@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT技术问答网站 - 标签</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 主题变量 */
+        :root {
+            /* 默认主题 */
+            --bg-primary: linear-gradient(145deg, #0f0f1e 0%, #1a1a2e 25%,  #16213e 50%, #0d0d1a 75%, #0a0a14 100%);
+            --bg-secondary: rgba(26, 26, 46, 0.6);
+            --bg-tertiary: rgba(26, 26, 46, 0.4);
+            --text-primary: #e8eaed;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --border-color: rgba(236, 72, 153, 0.1);
+            --accent-color: #ec4899;
+            --accent-secondary: #8b5cf6;
+            --header-bg: rgba(15, 15, 30, 0.92);
+            --card-bg: rgba(26, 26, 46, 0.6);
+            --btn-secondary-bg: rgba(148, 163, 184, 0.15);
+            --btn-secondary-text: #94a3b8;
+            --btn-secondary-border: rgba(148, 163, 184, 0.25);
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 亮色主题 */
+        [data-theme="light"] {
+            --bg-primary: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%, #f8fafc 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.8);
+            --bg-tertiary: rgba(255, 255, 255, 0.6);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-color: rgba(71, 85, 105, 0.1);
+            --accent-color: #d946ef;
+            --accent-secondary: #8b5cf6;
+            --header-bg: rgba(255, 255, 255, 0.92);
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --btn-secondary-bg: rgba(71, 85, 105, 0.1);
+            --btn-secondary-text: #475569;
+            --btn-secondary-border: rgba(71, 85, 105, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 深色主题 */
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(145deg, #0a0a0a 0%, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%, #0a0a0a 100%);
+            --bg-secondary: rgba(42, 42, 42, 0.8);
+            --bg-tertiary: rgba(42, 42, 42, 0.6);
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-tertiary: #808080;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-color: #ff4081;
+            --accent-secondary: #7c4dff;
+            --header-bg: rgba(26, 26, 26, 0.95);
+            --card-bg: rgba(42, 42, 42, 0.8);
+            --btn-secondary-bg: rgba(179, 179, 179, 0.1);
+            --btn-secondary-text: #b3b3b3;
+            --btn-secondary-border: rgba(179, 179, 179, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        /* 高对比度主题 */
+        [data-theme="high-contrast"] {
+            --bg-primary: #000000;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #ffffff;
+            --text-tertiary: #cccccc;
+            --border-color: #ffffff;
+            --accent-color: #ff00ff;
+            --accent-secondary: #00ffff;
+            --header-bg: #000000;
+            --card-bg: #1a1a1a;
+            --btn-secondary-bg: #333333;
+            --btn-secondary-text: #ffffff;
+            --btn-secondary-border: #ffffff;
+            --shadow-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding-top: 80px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 18px 28px;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 36px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+        }
+        
+        .nav {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .nav a {
+            color: #e0e6ed;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav a:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: #fff;
+        }
+        
+        .nav a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav a:hover::before {
+            width: 80%;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+            border: 2px solid rgba(99, 102, 241, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.1);
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: rgba(26, 31, 58, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 10px 0;
+            min-width: 150px;
+            display: none;
+            z-index: 1001;
+        }
+        
+        .user-dropdown.show {
+            display: block;
+        }
+        
+        .user-dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #e0e6ed;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .user-dropdown-item:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+        
+        .user-dropdown-item.logout {
+            color: #f87171;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-bell:hover {
+            background: rgba(236, 72, 153, 0.1);
+        }
+        
+        .bell-icon {
+            font-size: 22px;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            min-width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
+        }
+        
+        .notification-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 360px;
+            max-height: 480px;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px var(--shadow-color);
+            display: none;
+            z-index: 1002;
+            overflow: hidden;
+        }
+        
+        .notification-panel.show {
+            display: block;
+            animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .mark-all-read-btn {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mark-all-read-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+        }
+        
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .notification-item {
+            display: flex;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .notification-item:hover {
+            background: rgba(236, 72, 153, 0.05);
+        }
+        
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-unread {
+            background: rgba(236, 72, 153, 0.05);
+        }
+        
+        .notification-read {
+            opacity: 0.7;
+        }
+        
+        .notification-icon {
+            font-size: 24px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .notification-view-all {
+            padding: 12px 20px;
+            text-align: center;
+            color: #ec4899;
+            cursor: pointer;
+            border-top: 1px solid var(--border-color);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .notification-view-all:hover {
+            background: rgba(236, 72, 153, 0.05);
+        }
+        
+        .notification-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .chat-icon {
+            position: relative;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        
+        .chat-icon:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .chat-icon-symbol {
+            font-size: 22px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.2);
+            color: #e0e6ed;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .card {
+            background: rgba(26, 31, 58, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #e0e6ed;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e0e6ed;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(26, 31, 58, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #e0e6ed;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(224, 230, 237, 0.5);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: rgba(224, 230, 237, 0.6);
+        }
+        
+        .message-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 2000;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            animation: slideIn 0.3s ease-out;
+            backdrop-filter: blur(10px);
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(220, 38, 38, 0.9) 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+            animation: slideIn 0.3s ease-out;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .tag-item {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+            color: #e0e6ed;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .tag-item:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.5) 0%, rgba(139, 92, 246, 0.5) 100%);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .tag-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tag-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tag-card:hover::before {
+            opacity: 1;
+            width: 6px;
+        }
+        
+        .tag-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+        
+        .tag-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .tag-description {
+            color: #4b5563;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .tag-stats {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .tag-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .tag-actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: rgba(26, 31, 58, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e0e6ed;
+        }
+        
+        .close-modal {
+            font-size: 28px;
+            cursor: pointer;
+            color: rgba(224, 230, 237, 0.6);
+            transition: all 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            color: #e0e6ed;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .tag-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            background: rgba(26, 31, 58, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #e0e6ed;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            background: rgba(26, 31, 58, 0.8);
+        }
+        
+        .search-box input::placeholder {
+            color: #6b7280;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            background: rgba(26, 31, 58, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 12px;
+            padding: 15px 25px;
+        }
+        
+        .pagination-info {
+            color: rgba(224, 230, 237, 0.7);
+            font-size: 14px;
+            margin: 0 10px;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(26, 31, 58, 0.6);
+            color: #e0e6ed;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            min-width: 40px;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .pagination button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: 20px;
+        }
+        
+        .page-size-selector select {
+            padding: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(26, 31, 58, 0.6);
+            color: #e0e6ed;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .page-size-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            background: rgba(26, 31, 58, 0.8);
+        }
+        
+        .page-size-selector select option {
+            background: #1a1f3a;
+            color: #e0e6ed;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 95%;
+                padding: 0 20px;
+            }
+            
+            .tags-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+            
+            .header-content {
+                padding: 10px 15px;
+                gap: 15px;
+            }
+            
+            .header-left {
+                gap: 15px;
+            }
+            
+            .logo {
+                font-size: 18px;
+            }
+            
+            .nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--header-bg);
+                backdrop-filter: blur(24px);
+                flex-direction: column;
+                padding: 10px 15px;
+                border-bottom: 1px solid var(--border-color);
+                z-index: 1001;
+            }
+            
+            .nav.show {
+                display: flex;
+            }
+            
+            .nav a {
+                padding: 12px 16px;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .nav a:last-child {
+                border-bottom: none;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding: 0 15px;
+            }
+            
+            .card {
+                margin: 15px;
+                padding: 20px;
+            }
+            
+            .card-header {
+                padding: 16px;
+                margin: -20px -20px 20px -20px;
+            }
+            
+            .card-title {
+                font-size: 18px;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+                background: none;
+                border: none;
+                color: var(--text-primary);
+                font-size: 24px;
+                cursor: pointer;
+                padding: 5px;
+            }
+            
+            .notification-panel {
+                width: calc(100vw - 30px);
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                max-height: 300px;
+                position: fixed;
+                top: 60px;
+            }
+            
+            .search-box {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .search-btn {
+                width: 100%;
+            }
+            
+            .tags-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+            
+            .tag-card {
+                padding: 15px;
+            }
+            
+            .tag-name {
+                font-size: 14px;
+            }
+            
+            .tag-count {
+                font-size: 12px;
+            }
+            
+            .pagination {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .pagination button {
+                width: 100%;
+            }
+            
+            .page-size-selector {
+                width: 100%;
+            }
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                padding: 10px 15px;
+            }
+            
+            .logo {
+                font-size: 16px;
+            }
+            
+            .card {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .card-header {
+                padding: 12px;
+                margin: -15px -15px 15px -15px;
+            }
+            
+            .card-title {
+                font-size: 16px;
+            }
+            
+            .tags-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+            }
+            
+            .tag-card {
+                padding: 12px;
+            }
+            
+            .tag-name {
+                font-size: 13px;
+            }
+            
+            .tag-count {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+                <div class="logo" onclick="location.href='/'">技术问答社区</div>
+            </div>
+            <div class="header-right">
+                <nav class="nav" id="mainNav">
+                    <a href="/"><span>首页</span></a>
+                    <a href="/questions.html"><span>问题列表</span></a>
+                    <a href="/tags.html" class="tag-only"><span>标签</span></a>
+                </nav>
+                <div id="authButtons" class="auth-buttons">
+                    <button id="loginBtn" class="btn btn-secondary" onclick="window.location.href='/login.html'">登录</button>
+                    <button id="registerBtn" class="btn btn-primary" onclick="window.location.href='/register.html'">注册</button>
+                </div>
+                <div id="notificationBell" class="notification-bell hidden" onmouseenter="showNotificationPanel()" onmouseleave="hideNotificationPanel()" onclick="toggleNotificationPanelMobile()">
+                    <span class="bell-icon">🔔</span>
+                    <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                    <div id="notificationPanel" class="notification-panel" onmouseenter="showNotificationPanel()" onmouseleave="hideNotificationPanel()" onclick="event.stopPropagation()">
+                        <div class="notification-header">
+                            <span>消息通知</span>
+                            <button class="mark-all-read-btn" onclick="event.stopPropagation(); markAllNotificationsRead()">全部已读</button>
+                        </div>
+                        <div id="notificationList" class="notification-list">
+                            <div class="notification-empty">暂无通知</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="chatIcon" class="chat-icon hidden" onclick="window.location.href='/chat.html'">
+                    <span class="chat-icon-symbol">💬</span>
+                </div>
+                <div id="userInfo" class="user-info hidden">
+                    <img id="userAvatar" class="user-avatar" src="" alt="用户头像" onclick="toggleUserDropdown()">
+                    <div id="userDropdown" class="user-dropdown">
+                        <a class="user-dropdown-item" href="/profile.html">个人中心</a>
+                        <a class="user-dropdown-item admin-only hidden" href="/admin.html">管理后台</a>
+                        <a class="user-dropdown-item logout" onclick="logout()">退出登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div id="messageContainer" class="message-container"></div>
+    
+    <div class="container">
+        <div class="back-button">
+            <button class="btn btn-secondary" onclick="window.location.href='/'">返回首页</button>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">标签列表</div>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索标签..." onkeyup="if(event.keyCode===13) searchTags()">
+                <button class="btn btn-primary" onclick="searchTags()">搜索</button>
+            </div>
+            
+            <div id="tagsLoading" class="loading">加载中...</div>
+            <div id="tagsList" class="tag-grid"></div>
+            
+            <div id="pagination" class="pagination"></div>
+        </div>
+    </div>
+    
+    <div class="pagination">
+        <div class="pagination-info">
+            共 <span id="totalCount">0</span> 条，
+            第 <span id="currentPageNum">1</span> / <span id="totalPageNum">1</span> 页
+        </div>
+        <div class="page-size-selector">
+            <label for="pageSize">每页显示：</label>
+            <select id="pageSize">
+                <option value="5">5条</option>
+                <option value="10" selected>10条</option>
+                <option value="20">20条</option>
+                <option value="50">50条</option>
+            </select>
+        </div>
+    </div>
+    
+    <div id="editTagModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">编辑标签</div>
+                <span class="close-modal" onclick="closeEditTagModal()">&times;</span>
+            </div>
+            <div class="form-group">
+                <label for="editTagName">标签名称</label>
+                <input type="text" id="editTagName" placeholder="请输入标签名称">
+            </div>
+            <div class="form-group">
+                <label for="editTagDescription">标签描述</label>
+                <textarea id="editTagDescription" placeholder="请输入标签描述"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditTagModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveTag()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/common.js"></script>
+    <script>
+        function toggleMobileMenu() {
+            const nav = document.getElementById('mainNav');
+            nav.classList.toggle('show');
+        }
+        
+        let allTags = [];
+        let filteredTags = [];
+        let currentPage = 1;
+        let pageSize = 10;
+        
+        window.addEventListener('load', function() {
+            if (typeof loadTheme == 'function') {
+                loadTheme();
+            }
+            if (typeof updateNav == 'function') {
+                updateNav();
+            }
+            if (typeof loadTags == 'function') {
+                loadTags();
+            }
+            
+            document.getElementById('pageSize').addEventListener('change', function() {
+                pageSize = parseInt(this.value);
+                currentPage = 1;
+                displayTags();
+            });
+        });
+        
+        async function loadTags() {
+            var loadingDiv = document.getElementById('tagsLoading');
+            var listDiv = document.getElementById('tagsList');
+            
+            loadingDiv.classList.remove('hidden');
+            listDiv.innerHTML = '';
+            
+            try {
+                var response = await fetch(API_BASE_URL + '/tags');
+                var data = await response.json();
+                
+                if (data.code == 200) {
+                    allTags = data.data;
+                    filteredTags = data.data;
+                    displayTags();
+                } else {
+                    showMessage('加载标签失败：' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('加载标签失败：', error);
+                showMessage('加载标签失败，请检查后端服务是否启动', 'error');
+            } finally {
+                loadingDiv.classList.add('hidden');
+            }
+        }
+        
+        function displayTags() {
+            var container = document.getElementById('tagsList');
+            container.innerHTML = '';
+            
+            var startIndex = (currentPage - 1) * pageSize;
+            var endIndex = startIndex + pageSize;
+            var pageTags = filteredTags.slice(startIndex, endIndex);
+            
+            if (pageTags && pageTags.length > 0) {
+                pageTags.forEach(function(tag) {
+                    var card = document.createElement('div');
+                    card.className = 'tag-card';
+                    card.onclick = function(e) {
+                        if (e.target.tagName !== 'BUTTON') {
+                            window.location.href = '/questions.html?tag=' + tag.id;
+                        }
+                    };
+                    var actionsHtml = '';
+                    if (currentUser && currentUser.role === 'ADMIN') {
+                        actionsHtml = '<div class="tag-actions">' +
+                            '<button class="btn btn-primary" onclick="event.stopPropagation(); openEditTagModal(' + tag.id + ')">编辑</button>' +
+                            '<button class="btn btn-danger" onclick="event.stopPropagation(); deleteTag(' + tag.id + ')">删除</button>' +
+                            '</div>';
+                    }
+                    card.innerHTML = '<div class="tag-name">' + escapeHtml(tag.name) + '</div>' +
+                        '<div class="tag-description">' + escapeHtml(tag.description || '暂无描述') + '</div>' +
+                        '<div class="tag-stats">创建于：' + formatDate(tag.createdAt) + '</div>' +
+                        actionsHtml;
+                    container.appendChild(card);
+                });
+            } else {
+                container.innerHTML = '<p style="text-align: center; color: rgba(224, 230, 237, 0.6); padding: 40px; grid-column: 1 / -1;">暂无标签</p>';
+            }
+            
+            updatePagination();
+        }
+        
+        function updatePagination() {
+            var paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+            
+            var totalPages = Math.ceil(filteredTags.length / pageSize);
+            
+            document.getElementById('totalCount').textContent = filteredTags.length;
+            document.getElementById('currentPageNum').textContent = currentPage;
+            document.getElementById('totalPageNum').textContent = totalPages;
+            
+            if (totalPages <= 1) {
+                return;
+            }
+            
+            var prevButton = document.createElement('button');
+            prevButton.textContent = '上一页';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayTags();
+                }
+            };
+            paginationDiv.appendChild(prevButton);
+            
+            for (var i = 1; i <= totalPages; i++) {
+                var pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.className = i === currentPage ? 'active' : '';
+                pageButton.onclick = function(page) {
+                    return function() {
+                        currentPage = page;
+                        displayTags();
+                    };
+                }(i);
+                paginationDiv.appendChild(pageButton);
+            }
+            
+            var nextButton = document.createElement('button');
+            nextButton.textContent = '下一页';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = function() {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayTags();
+                }
+            };
+            paginationDiv.appendChild(nextButton);
+        }
+        
+        function searchTags() {
+            var searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                filteredTags = allTags;
+            } else {
+                filteredTags = allTags.filter(function(tag) {
+                    return tag.name.toLowerCase().includes(searchTerm) || 
+                           (tag.description && tag.description.toLowerCase().includes(searchTerm));
+                });
+            }
+            
+            currentPage = 1;
+            displayTags();
+        }
+        
+        function openEditTagModal(tagId) {
+            var tag = allTags.find(function(t) { return t.id === tagId; });
+            if (tag) {
+                document.getElementById('editTagName').value = tag.name;
+                document.getElementById('editTagDescription').value = tag.description || '';
+                document.getElementById('editTagModal').classList.add('show');
+                document.getElementById('editTagName').dataset.tagId = tagId;
+            }
+        }
+        
+        function closeEditTagModal() {
+            document.getElementById('editTagModal').classList.remove('show');
+            document.getElementById('editTagName').value = '';
+            document.getElementById('editTagDescription').value = '';
+        }
+        
+        async function saveTag() {
+            var tagId = document.getElementById('editTagName').dataset.tagId;
+            var name = document.getElementById('editTagName').value.trim();
+            var description = document.getElementById('editTagDescription').value.trim();
+            
+            if (!name) {
+                showMessage('标签名称不能为空', 'error');
+                return;
+            }
+            
+            try {
+                var response = await fetch(API_BASE_URL + '/tags/' + tagId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        description: description
+                    })
+                });
+                
+                var data = await response.json();
+                
+                if (data.code == 200) {
+                    showMessage('标签更新成功', 'success');
+                    closeEditTagModal();
+                    loadTags();
+                } else {
+                    showMessage('标签更新失败：' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('标签更新失败：', error);
+                showMessage('标签更新失败，请检查后端服务是否启动', 'error');
+            }
+        }
+        
+        async function deleteTag(tagId) {
+            if (!confirm('确定要删除这个标签吗？')) {
+                return;
+            }
+            
+            try {
+                var response = await fetch(API_BASE_URL + '/tags/' + tagId, {
+                    method: 'DELETE'
+                });
+                
+                var data = await response.json();
+                
+                if (data.code == 200) {
+                    showMessage('标签删除成功', 'success');
+                    loadTags();
+                } else {
+                    showMessage('标签删除失败：' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('标签删除失败：', error);
+                showMessage('标签删除失败，请检查后端服务是否启动', 'error');
+            }
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            var date = new Date(dateString);
+            return date.getFullYear() + '-' + 
+                   String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(date.getDate()).padStart(2, '0');
+        }
+    </script>
+</body>
+</html>

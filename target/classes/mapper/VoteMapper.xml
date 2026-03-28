@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.qa.mapper.VoteMapper">
+    
+    <select id="findByTargetAndUser" resultType="com.example.qa.entity.Vote">
+        SELECT id, target_type, target_id, user_id, vote_type, created_at
+        FROM vote
+        WHERE target_type = #{targetType}
+          AND target_id = #{targetId}
+          AND user_id = #{userId}
+    </select>
+    
+</mapper>

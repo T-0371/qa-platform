@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="default">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT技术问答网站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 主题变量 */
+        :root {
+            /* 默认主题 */
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #f5f5f5;
+            --dark-color: #333;
+            --text-color: #333;
+            --text-secondary: #666;
+            --text-light: #999;
+            --background-color: #f5f5f5;
+            --card-background: #fff;
+            --border-color: #eee;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-hover: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* 深色主题 */
+        [data-theme="dark"] {
+            --primary-color: #1e293b;
+            --secondary-color: #334155;
+            --accent-color: #60a5fa;
+            --success-color: #34d399;
+            --danger-color: #f87171;
+            --warning-color: #fbbf24;
+            --light-color: #f1f5f9;
+            --dark-color: #0f172a;
+            --text-color: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-light: #94a3b8;
+            --background-color: #0f172a;
+            --card-background: #1e293b;
+            --border-color: #334155;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+            --shadow-hover: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        
+        /* 亮色主题 */
+        [data-theme="light"] {
+            --primary-color: #ffffff;
+            --secondary-color: #f8fafc;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --text-color: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-hover: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* 高对比度主题 */
+        [data-theme="high-contrast"] {
+            --primary-color: #000000;
+            --secondary-color: #1a1a1a;
+            --accent-color: #ffcc00;
+            --success-color: #00ff00;
+            --danger-color: #ff0000;
+            --warning-color: #ff9900;
+            --light-color: #ffffff;
+            --dark-color: #000000;
+            --text-color: #ffffff;
+            --text-secondary: #cccccc;
+            --text-light: #999999;
+            --background-color: #000000;
+            --card-background: #1a1a1a;
+            --border-color: #333333;
+            --shadow: 0 2px 4px rgba(255,255,255,0.1);
+            --shadow-hover: 0 4px 8px rgba(255,255,255,0.2);
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            padding-top: 80px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            padding: 15px 0;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .nav {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav a {
+            color: var(--light-color);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .nav a:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+            border: 2px solid var(--light-color);
+            transition: transform 0.3s;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: var(--shadow-hover);
+            padding: 10px 0;
+            min-width: 150px;
+            display: none;
+            z-index: 1001;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .user-dropdown.show {
+            display: block;
+        }
+        
+        .user-dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+        }
+        
+        .user-dropdown-item:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-dropdown-item.logout {
+            color: var(--danger-color);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--light-color);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: var(--light-color);
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background-color: var(--text-light);
+            color: var(--light-color);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .card {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .question-item {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+        
+        .question-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .question-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+        
+        .question-content {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s, background-color 0.3s ease, color 0.3s ease;
+            background-color: var(--card-background);
+            color: var(--text-color);
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .welcome {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .welcome h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .welcome p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+        
+        .welcome .btn {
+            margin: 0 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .message-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 2000;
+        }
+        
+        .success-message {
+            background-color: var(--success-color);
+            color: var(--dark-color);
+            padding: 15px 25px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-hover);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .error-message {
+            background-color: var(--danger-color);
+            color: var(--light-color);
+            padding: 15px 25px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-hover);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .tag-item {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: var(--light-color);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        .tag-item:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .admin-tabs .btn {
+            margin: 0;
+        }
+        
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        .user-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .user-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .user-info-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-details {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .user-email {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .user-role {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .user-role.admin {
+            background-color: var(--danger-color);
+            color: var(--light-color);
+        }
+        
+        .user-role.user {
+            background-color: var(--accent-color);
+            color: var(--light-color);
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        /* 主题切换按钮 */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        
+        .theme-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        
+        .theme-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--accent-color);
+        }
+        
+        .theme-btn.active {
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.5);
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="header-left">
+                <div class="logo" onclick="location.href='/'">IT技术问答</div>
+                <nav class="nav">
+                    <a href="/">首页</a>
+                    <a href="/questions.html">问题列表</a>
+                    <a href="/tags.html" class="tag-only">标签</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="theme-toggle">
+                    <button class="theme-btn" onclick="switchTheme('default')" title="默认主题">🌙</button>
+                    <button class="theme-btn" onclick="switchTheme('light')" title="亮色主题">☀️</button>
+                    <button class="theme-btn" onclick="switchTheme('dark')" title="深色主题">🌑</button>
+                    <button class="theme-btn" onclick="switchTheme('high-contrast')" title="高对比度主题">⚡</button>
+                </div>
+                <nav class="nav">
+                    <a href="/register.html" id="registerBtn">注册</a>
+                    <a href="/login.html" id="loginBtn">登录</a>
+                </nav>
+                <div id="userInfo" class="user-info">
+                    <img id="userAvatar" class="user-avatar hidden" src="" alt="用户头像" onclick="toggleUserDropdown()">
+                    <div id="userDropdown" class="user-dropdown">
+                        <a class="user-dropdown-item" href="/profile.html">个人中心</a>
+                        <a class="user-dropdown-item admin-only hidden" href="/admin.html">管理后台</a>
+                        <a class="user-dropdown-item logout" onclick="logout()">退出登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div id="messageContainer" class="message-container"></div>
+    
+    <div class="container">
+        <!-- 页面内容将在这里插入 -->
+    </div>
+    
+    <script src="/js/common.js"></script>
+    <script>
+        // 页面加载时更新导航栏和主题
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNav();
+            loadTheme();
+        });
+        
+        // 切换主题
+        function switchTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            updateThemeButtons();
+            showMessage('主题已切换为' + getThemeName(theme), 'success');
+        }
+        
+        // 加载保存的主题
+        function loadTheme() {
+            var savedTheme = localStorage.getItem('theme') || 'default';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeButtons();
+        }
+        
+        // 更新主题按钮状态
+        function updateThemeButtons() {
+            var currentTheme = document.documentElement.getAttribute('data-theme');
+            var themeButtons = document.querySelectorAll('.theme-btn');
+            themeButtons.forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            // 这里可以根据需要添加active状态
+        }
+        
+        // 获取主题名称
+        function getThemeName(theme) {
+            switch(theme) {
+                case 'default': return '默认主题';
+                case 'light': return '亮色主题';
+                case 'dark': return '深色主题';
+                case 'high-contrast': return '高对比度主题';
+                default: return '默认主题';
+            }
+        }
+    </script>
+</body>
+</html>

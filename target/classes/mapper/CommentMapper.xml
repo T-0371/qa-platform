@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.qa.mapper.CommentMapper">
+    
+    <select id="findCommentsByTarget" resultType="com.example.qa.entity.Comment">
+        SELECT id, target_type, target_id, user_id, content, created_at, 
+updated_at
+        FROM comment
+        WHERE target_type = #{targetType}
+          AND target_id = #{targetId}
+        ORDER BY created_at ASC
+    </select>
+    
+</mapper>
