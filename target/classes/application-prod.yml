@@ -27,7 +27,13 @@ spring:
     enabled: false
   sql:
     init:
-      mode: never
+      mode: always
+      schema-locations: classpath:qa_platform.sql,classpath:message_table.sql,classpath:system_config.sql
+      encoding: UTF-8
+  jpa:
+    hibernate:
+      ddl-auto: none
+    defer-datasource-initialization: true
 
 mybatis-plus:
   mapper-locations: classpath:mapper/**/*.xml
