@@ -1,39 +1,59 @@
 package com.example.qa.controller;
 
 import com.example.qa.dto.response.ApiResponse;
-import com.example.qa.entity.SystemConfig;
+import com.example.qa.entity.User;
 import com.example.qa.service.SystemConfigService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
+
 @RestController
-@RequestMapping("/system-config")
-@Tag(name = "系统配置", description = "系统配置管理")
+@RequestMapping("/system")
 public class SystemConfigController {
-    
+
     @Autowired
     private SystemConfigService systemConfigService;
-    
-    @GetMapping
-    @Operation(summary = "获取系统配置", description = "获取当前系统配置")
-    public ApiResponse<SystemConfig> getConfig() {
-        SystemConfig config = systemConfigService.getConfig();
-        return ApiResponse.success(config);
+
+    @GetMapping("/config")
+    public ApiResponse getSystemConfig() {
+        try {
+            return ApiResponse.success("获取系统配置成功", systemConfigService.getSystemConfig());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取系统配置失败: " + e.getMessage());
+        }
     }
-    
-    @PostMapping
-    @Operation(summary = "更新系统配置", description = "更新系统配置")
-    public ApiResponse<SystemConfig> updateConfig(@RequestBody SystemConfig config) {
-        SystemConfig updatedConfig = systemConfigService.updateConfig(config);
-        return ApiResponse.success(updatedConfig);
+
+    @PutMapping("/config")
+    public ApiResponse updateSystemConfig(@RequestParam String key, @RequestParam String value, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null || !"admin".equals(user.getRole())) {
+                return ApiResponse.error("权限不足");
+            }
+            
+            systemConfigService.updateSystemConfig(key, value);
+            return ApiResponse.success("更新系统配置成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("更新系统配置失败: " + e.getMessage());
+        }
     }
-    
-    @PostMapping("/reset")
-    @Operation(summary = "重置系统配置", description = "重置为默认配置")
-    public ApiResponse<SystemConfig> resetToDefault() {
-        SystemConfig config = systemConfigService.resetToDefault();
-        return ApiResponse.success(config);
+
+    @PostMapping("/refresh")
+    public ApiResponse refreshSystemConfig(HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null || !"admin".equals(user.getRole())) {
+                return ApiResponse.error("权限不足");
+            }
+            
+            systemConfigService.refreshSystemConfig();
+            return ApiResponse.success("刷新系统配置成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("刷新系统配置失败: " + e.getMessage());
+        }
     }
 }
