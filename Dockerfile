@@ -20,5 +20,5 @@ EXPOSE 8080
 ENV PORT=8080
 ENV SPRING_PROFILES_ACTIVE=prod
 
-# Run the application
-CMD ["java", "-Dserver.port=$PORT", "-jar", "target/qa-platform.jar", "--spring.profiles.active=prod"]
+# Run the application using shell to parse environment variables
+CMD sh -c "java -Dserver.port=$PORT -jar target/qa-platform.jar --spring.profiles.active=$SPRING_PROFILES_ACTIVE"
