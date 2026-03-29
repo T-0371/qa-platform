@@ -1,187 +1,165 @@
 package com.example.qa.controller;
 
-import com.example.qa.dto.request.QuestionCreateRequest;
+import com.example.qa.dto.request.QuestionRequest;
 import com.example.qa.dto.response.ApiResponse;
-import com.example.qa.entity.HotQuestionConfig;
-import com.example.qa.entity.PointsConfig;
 import com.example.qa.entity.Question;
-import com.example.qa.service.HotQuestionConfigService;
-import com.example.qa.service.PointsConfigService;
+import com.example.qa.entity.User;
 import com.example.qa.service.QuestionService;
-import com.example.qa.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
-/**
- * 问题管理控制器
- * 实现问题相关的API接口
- */
 @RestController
 @RequestMapping("/questions")
-@Tag(name = "问题管理", description = "问题的创建、查询、更新、删除等接口")
 public class QuestionController {
-    
+
     @Autowired
     private QuestionService questionService;
-    
-    @Autowired
-    private HotQuestionConfigService hotQuestionConfigService;
-    
-    @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private PointsConfigService pointsConfigService;
-    
-    /**
-     * 创建问题
-     * @param request 问题创建请求
-     * @return 创建成功的问题信息
-     */
+
     @PostMapping
-    @Operation(summary = "创建问题", description = "创建新的问题")
-    public ApiResponse<Question> createQuestion(@RequestBody QuestionCreateRequest request) {
-        Long userId = request.getUserId();
-        Question question = questionService.createQuestion(request, userId);
-        
-        // 从积分配置中获取发布问题获得的积分
-        PointsConfig config = pointsConfigService.getCurrentConfig();
-        int questionReward = config != null && config.getQuestionReward() != null ? config.getQuestionReward() : 10;
-        
-        // 发布问题增加积分
-        userService.addPoints(userId, questionReward);
-        ApiResponse<Question> response = ApiResponse.success(question);
-        response.setMessage("问题创建成功，获得" + questionReward + "积分");
-        return response;
-    }
-    
-    /**
-     * 获取问题列表
-     * @param page 页码
-     * @param size 每页大小
-     * @param keyword 搜索关键词（可选）
-     * @return 问题列表
-     */
-    @GetMapping
-    @Operation(summary = "获取问题列表", description = "分页获取问题列表，支持关键词搜索")
-    public ApiResponse<List<Question>> getQuestionList(@RequestParam(defaultValue = "1") int page, 
-                                                        @RequestParam(defaultValue = "10") int size,
-                                                        @RequestParam(required = false) String keyword) {
-        List<Question> questions;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            questions = questionService.searchQuestions(keyword.trim(), page, size);
-        } else {
-            questions = questionService.getQuestionList(page, size);
+    public ApiResponse createQuestion(@RequestBody QuestionRequest questionRequest, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ApiResponse.error("用户未登录");
+            }
+            
+            Question question = questionService.createQuestion(
+                questionRequest.getTitle(),
+                questionRequest.getContent(),
+                questionRequest.getTagIds(),
+                user.getId()
+            );
+            return ApiResponse.success("创建成功", question);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("创建失败: " + e.getMessage());
         }
-        return ApiResponse.success(questions);
     }
-    
-    /**
-     * 获取问题详情
-     * @param id 问题ID
-     * @return 问题详情
-     */
+
+    @GetMapping
+    public ApiResponse getQuestions(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword) {
+        try {
+            List<Question> questions = questionService.getQuestions(page, size, keyword);
+            long total = questionService.getQuestionCount(keyword);
+            return ApiResponse.success("获取成功", Map.of("list", questions, "total", total));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}")
-    @Operation(summary = "获取问题详情", description = "根据问题ID获取问题详细信息")
-    public ApiResponse<Question> getQuestionById(@PathVariable Long id) {
-        Question question = questionService.getQuestionById(id);
-        return ApiResponse.success(question);
+    public ApiResponse getQuestionById(@PathVariable Long id) {
+        try {
+            Question question = questionService.getQuestionById(id);
+            if (question == null) {
+                return ApiResponse.error("问题不存在");
+            }
+            return ApiResponse.success("获取成功", question);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 获取问题详情（不增加浏览量）
-     * @param id 问题ID
-     * @return 问题详情
-     */
-    @GetMapping("/{id}/no-view")
-    @Operation(summary = "获取问题详情（不增加浏览量）", description = "根据问题ID获取问题详细信息，不增加浏览量")
-    public ApiResponse<Question> getQuestionByIdWithoutViewCount(@PathVariable Long id) {
-        Question question = questionService.getQuestionByIdWithoutViewCount(id);
-        return ApiResponse.success(question);
+
+    @GetMapping("/detail/{id}")
+    public ApiResponse getQuestionDetail(@PathVariable Long id) {
+        try {
+            Question question = questionService.getQuestionDetail(id);
+            if (question == null) {
+                return ApiResponse.error("问题不存在");
+            }
+            return ApiResponse.success("获取成功", question);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 更新问题
-     * @param id 问题ID
-     * @param request 问题更新请求
-     * @param userId 用户ID（从请求参数或认证中获取，可选）
-     * @return 更新后的问题信息
-     */
+
     @PutMapping("/{id}")
-    @Operation(summary = "更新问题", description = "更新问题的标题和内容")
-    public ApiResponse<Question> updateQuestion(@PathVariable Long id, @RequestBody QuestionCreateRequest request, 
-                                                 @RequestParam(value = "userId", required = false) Long paramUserId,
-                                                 @RequestAttribute(value = "userId", required = false) Long attrUserId) {
-        Long userId = paramUserId != null ? paramUserId : attrUserId;
-        Question question = questionService.updateQuestion(id, request, userId);
-        return ApiResponse.success(question);
+    public ApiResponse updateQuestion(@PathVariable Long id, @RequestBody QuestionRequest questionRequest, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ApiResponse.error("用户未登录");
+            }
+            
+            Question question = questionService.getQuestionById(id);
+            if (question == null) {
+                return ApiResponse.error("问题不存在");
+            }
+            if (!question.getUserId().equals(user.getId()) && !"admin".equals(user.getRole())) {
+                return ApiResponse.error("权限不足");
+            }
+            
+            questionService.updateQuestion(id, questionRequest.getTitle(), questionRequest.getContent(), questionRequest.getTagIds());
+            return ApiResponse.success("更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("更新失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 删除问题
-     * @param id 问题ID
-     * @param userId 用户ID（从请求参数或认证中获取，可选）
-     * @return 删除成功的响应
-     */
+
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除问题", description = "删除指定的问题")
-    public ApiResponse<Void> deleteQuestion(@PathVariable Long id, 
-                                            @RequestParam(value = "userId", required = false) Long paramUserId,
-                                            @RequestAttribute(value = "userId", required = false) Long attrUserId) {
-        Long userId = paramUserId != null ? paramUserId : attrUserId;
-        questionService.deleteQuestion(id, userId);
-        return ApiResponse.success(null);
+    public ApiResponse deleteQuestion(@PathVariable Long id, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ApiResponse.error("用户未登录");
+            }
+            
+            Question question = questionService.getQuestionById(id);
+            if (question == null) {
+                return ApiResponse.error("问题不存在");
+            }
+            if (!question.getUserId().equals(user.getId()) && !"admin".equals(user.getRole())) {
+                return ApiResponse.error("权限不足");
+            }
+            
+            questionService.deleteQuestion(id);
+            return ApiResponse.success("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("删除失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 获取热门问题
-     * @param limit 数量限制
-     * @return 热门问题列表
-     */
-    @GetMapping("/hot")
-    @Operation(summary = "获取热门问题", description = "获取浏览量较高的热门问题")
-    public ApiResponse<List<Question>> getHotQuestions(@RequestParam(defaultValue = "10") int limit) {
-        HotQuestionConfig config = hotQuestionConfigService.getEnabledConfig();
-        List<Question> questions = questionService.getHotQuestionsByConfig(
-            config.getTimeRangeDays(),
-            config.getMinViewCount(),
-            config.getMinAnswerCount(),
-            config.getMinVoteCount(),
-            config.getSortBy(),
-            Math.min(limit, config.getDisplayCount())
-        );
-        return ApiResponse.success(questions);
+
+    @GetMapping("/hot/list")
+    public ApiResponse getHotQuestions() {
+        try {
+            List<Question> questions = questionService.getHotQuestions();
+            return ApiResponse.success("获取成功", questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 获取最新问题
-     * @param limit 数量限制
-     * @return 最新问题列表
-     */
-    @GetMapping("/latest")
-    @Operation(summary = "获取最新问题", description = "获取最新发布的问题")
-    public ApiResponse<List<Question>> getLatestQuestions(@RequestParam(defaultValue = "10") int limit) {
-        List<Question> questions = questionService.getLatestQuestions(limit);
-        return ApiResponse.success(questions);
+
+    @GetMapping("/latest/list")
+    public ApiResponse getLatestQuestions() {
+        try {
+            List<Question> questions = questionService.getLatestQuestions();
+            return ApiResponse.success("获取成功", questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 搜索问题
-     * @param keyword 关键词
-     * @param page 页码
-     * @param size 每页大小
-     * @return 搜索结果
-     */
+
     @GetMapping("/search")
-    @Operation(summary = "搜索问题", description = "根据关键词搜索问题")
-    public ApiResponse<List<Question>> searchQuestions(@RequestParam String keyword,
-                                                        @RequestParam(defaultValue = "1") int page,
-                                                        @RequestParam(defaultValue = "10") int size) {
-        List<Question> questions = questionService.searchQuestions(keyword, page, size);
-        return ApiResponse.success(questions);
+    public ApiResponse searchQuestions(@RequestParam String keyword) {
+        try {
+            List<Question> questions = questionService.searchQuestions(keyword);
+            return ApiResponse.success("搜索成功", questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("搜索失败: " + e.getMessage());
+        }
     }
 }

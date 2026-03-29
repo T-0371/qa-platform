@@ -3,140 +3,137 @@ package com.example.qa.controller;
 import com.example.qa.dto.response.ApiResponse;
 import com.example.qa.entity.HotQuestionConfig;
 import com.example.qa.entity.Question;
+import com.example.qa.entity.User;
 import com.example.qa.service.HotQuestionConfigService;
-import com.example.qa.service.QuestionService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import javax.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Map;
 
-/**
- * 热门问题配置控制器
- */
 @RestController
-@RequestMapping("/hot-question-config")
-@Tag(name = "热门问题配置", description = "热门问题排行榜配置管理")
+@RequestMapping("/hot-question/config")
 public class HotQuestionConfigController {
-    
+
     @Autowired
     private HotQuestionConfigService hotQuestionConfigService;
-    
-    @Autowired
-    private QuestionService questionService;
-    
-    /**
-     * 创建配置
-     */
+
     @PostMapping
-    @Operation(summary = "创建热门问题配置", description = "创建新的热门问题排行榜配置")
-    public ApiResponse<HotQuestionConfig> createConfig(@RequestBody HotQuestionConfig config) {
-        HotQuestionConfig createdConfig = hotQuestionConfigService.createConfig(config);
-        return ApiResponse.success(createdConfig);
+    public ApiResponse createConfig(@RequestBody HotQuestionConfig config, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null || !"admin".equals(user.getRole())) {
+                return ApiResponse.error("权限不足");
+            }
+            hotQuestionConfigService.createConfig(config);
+            return ApiResponse.success("创建成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("创建失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 更新配置
-     */
+
     @PutMapping("/{id}")
-    @Operation(summary = "更新热门问题配置", description = "更新热门问题排行榜配置")
-    public ApiResponse<HotQuestionConfig> updateConfig(@PathVariable Long id, @RequestBody HotQuestionConfig config) {
-        config.setId(id);
-        HotQuestionConfig updatedConfig = hotQuestionConfigService.updateConfig(config);
-        return ApiResponse.success(updatedConfig);
+    public ApiResponse updateConfig(@PathVariable Long id, @RequestBody HotQuestionConfig config, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null || !"admin".equals(user.getRole())) {
+                return ApiResponse.error("权限不足");
+            }
+            config.setId(id);
+            hotQuestionConfigService.updateConfig(config);
+            return ApiResponse.success("更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("更新失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 删除配置
-     */
+
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除热门问题配置", description = "删除热门问题排行榜配置")
-    public ApiResponse<Void> deleteConfig(@PathVariable Long id) {
-        hotQuestionConfigService.deleteConfig(id);
-        return ApiResponse.success(null);
+    public ApiResponse deleteConfig(@PathVariable Long id, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null || !"admin".equals(user.getRole())) {
+                return ApiResponse.error("权限不足");
+            }
+            hotQuestionConfigService.deleteConfig(id);
+            return ApiResponse.success("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("删除失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 获取配置详情
-     */
+
     @GetMapping("/{id}")
-    @Operation(summary = "获取热门问题配置详情", description = "根据ID获取配置详情")
-    public ApiResponse<HotQuestionConfig> getConfigById(@PathVariable Long id) {
-        HotQuestionConfig config = hotQuestionConfigService.getConfigById(id);
-        return ApiResponse.success(config);
+    public ApiResponse getConfigById(@PathVariable Long id) {
+        try {
+            HotQuestionConfig config = hotQuestionConfigService.getConfigById(id);
+            if (config == null) {
+                return ApiResponse.error("配置不存在");
+            }
+            return ApiResponse.success("获取成功", config);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 获取所有配置
-     */
+
     @GetMapping
-    @Operation(summary = "获取所有热门问题配置", description = "获取所有配置列表")
-    public ApiResponse<List<HotQuestionConfig>> getAllConfigs() {
-        List<HotQuestionConfig> configs = hotQuestionConfigService.getAllConfigs();
-        return ApiResponse.success(configs);
+    public ApiResponse getAllConfigs() {
+        try {
+            List<HotQuestionConfig> configs = hotQuestionConfigService.getAllConfigs();
+            return ApiResponse.success("获取成功", configs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 启用配置
-     */
-    @PostMapping("/{id}/enable")
-    @Operation(summary = "启用热门问题配置", description = "启用指定的配置")
-    public ApiResponse<Void> enableConfig(@PathVariable Long id) {
-        hotQuestionConfigService.enableConfig(id);
-        return ApiResponse.success(null);
+
+    @PutMapping("/enable/{id}")
+    public ApiResponse enableConfig(@PathVariable Long id, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null || !"admin".equals(user.getRole())) {
+                return ApiResponse.error("权限不足");
+            }
+            hotQuestionConfigService.enableConfig(id);
+            return ApiResponse.success("启用成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("启用失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 获取当前启用的配置
-     */
-    @GetMapping("/enabled")
-    @Operation(summary = "获取当前启用的配置", description = "获取当前启用的热门问题配置")
-    public ApiResponse<HotQuestionConfig> getEnabledConfig() {
-        HotQuestionConfig config = hotQuestionConfigService.getEnabledConfig();
-        return ApiResponse.success(config);
+
+    @GetMapping("/current")
+    public ApiResponse getCurrentConfig() {
+        try {
+            HotQuestionConfig config = hotQuestionConfigService.getCurrentConfig();
+            return ApiResponse.success("获取成功", config);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 根据当前配置获取热门问题
-     */
+
     @GetMapping("/hot-questions")
-    @Operation(summary = "获取热门问题", description = "根据当前配置获取热门问题排行榜")
-    public ApiResponse<List<Question>> getHotQuestionsByConfig() {
-        HotQuestionConfig config = hotQuestionConfigService.getEnabledConfig();
-        List<Question> questions = questionService.getHotQuestionsByConfig(
-            config.getTimeRangeDays(),
-            config.getMinViewCount(),
-            config.getMinAnswerCount(),
-            config.getMinVoteCount(),
-            config.getSortBy(),
-            config.getDisplayCount()
-        );
-        return ApiResponse.success(questions);
+    public ApiResponse getHotQuestions() {
+        try {
+            List<Question> questions = hotQuestionConfigService.getHotQuestions();
+            return ApiResponse.success("获取成功", questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
     }
-    
-    /**
-     * 预览配置效果
-     */
+
     @PostMapping("/preview")
-    @Operation(summary = "预览配置效果", description = "预览指定配置的热门问题效果")
-    public ApiResponse<Map<String, Object>> previewConfig(@RequestBody HotQuestionConfig config) {
-        List<Question> questions = questionService.getHotQuestionsByConfig(
-            config.getTimeRangeDays(),
-            config.getMinViewCount(),
-            config.getMinAnswerCount(),
-            config.getMinVoteCount(),
-            config.getSortBy(),
-            config.getDisplayCount()
-        );
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("config", config);
-        result.put("questions", questions);
-        result.put("totalCount", questions.size());
-        
-        return ApiResponse.success(result);
+    public ApiResponse previewConfig(@RequestBody HotQuestionConfig config) {
+        try {
+            List<Question> questions = hotQuestionConfigService.previewConfig(config);
+            return ApiResponse.success("预览成功", questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("预览失败: " + e.getMessage());
+        }
     }
 }
