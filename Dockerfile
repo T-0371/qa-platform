@@ -17,8 +17,7 @@ RUN mvn clean package -DskipTests
 EXPOSE 8080
 
 # Set environment variables
-ENV PORT=8080
 ENV SPRING_PROFILES_ACTIVE=prod
 
-# Run the application using shell to parse environment variables
-CMD sh -c "java -Dserver.port=$PORT -jar target/qa-platform.jar --spring.profiles.active=$SPRING_PROFILES_ACTIVE"
+# Run the application using fixed port 8080
+CMD java -Dserver.port=8080 -jar target/qa-platform.jar --spring.profiles.active=$SPRING_PROFILES_ACTIVE
