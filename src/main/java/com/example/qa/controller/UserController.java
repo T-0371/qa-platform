@@ -1,5 +1,6 @@
 package com.example.qa.controller;
 
+import com.example.qa.dto.request.UserLoginRequest;
 import com.example.qa.dto.request.UserRegisterRequest;
 import com.example.qa.dto.response.ApiResponse;
 import com.example.qa.entity.User;
@@ -18,12 +19,10 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ApiResponse register(@RequestBody UserRegisterRequest registerRequest) {
+    public ApiResponse register(@RequestBody UserRegisterRequest request) {
         try {
-            userService.register(registerRequest.getUsername(), registerRequest.getPassword(), 
-                                registerRequest.getEmail(), registerRequest.getPhone(),
-                                registerRequest.getSecurityQuestion(), registerRequest.getSecurityAnswer());
-            return ApiResponse.success("注册成功");
+            User user = userService.register(request);
+            return ApiResponse.success("注册成功", user);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("注册失败: " + e.getMessage());
@@ -31,14 +30,29 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ApiResponse login(@RequestParam String username, @RequestParam String password, HttpSession session) {
+    public ApiResponse login(@RequestBody UserLoginRequest request, HttpSession session) {
         try {
-            User user = userService.login(username, password);
+            User user = userService.login(request);
             session.setAttribute("user", user);
             return ApiResponse.success("登录成功", user);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("登录失败: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse logout(HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ApiResponse.error("用户未登录");
+            }
+            session.invalidate();
+            return ApiResponse.success("退出成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("退出失败: " + e.getMessage());
         }
     }
 
@@ -64,11 +78,34 @@ public class UserController {
                 return ApiResponse.error("用户未登录");
             }
             user.setId(currentUser.getId());
-            userService.updateUser(user);
-            return ApiResponse.success("更新成功");
+            User updatedUser = userService.updateUser(user);
+            session.setAttribute("user", updatedUser);
+            return ApiResponse.success("更新成功", updatedUser);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("更新失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/search")
+    public ApiResponse searchUsers(@RequestParam String keyword) {
+        try {
+            List<User> users = userService.searchUsers(keyword);
+            return ApiResponse.success("搜索成功", users);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("搜索失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/all")
+    public ApiResponse getAllUsers() {
+        try {
+            List<User> users = userService.getAllUsers();
+            return ApiResponse.success("获取成功", users);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
         }
     }
 
@@ -86,50 +123,25 @@ public class UserController {
         }
     }
 
-    @GetMapping
-    public ApiResponse getUsers(@RequestParam(required = false) String keyword) {
+    @PostMapping("/reset-password")
+    public ApiResponse resetPassword(@RequestParam String username, 
+                                    @RequestParam String securityAnswer, 
+                                    @RequestParam String newPassword) {
         try {
-            List<User> users = userService.getUsers(keyword);
-            return ApiResponse.success("获取成功", users);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ApiResponse.error("获取失败: " + e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ApiResponse deleteUser(@PathVariable Long id, HttpSession session) {
-        try {
-            User user = (User) session.getAttribute("user");
-            if (user == null || !"admin".equals(user.getRole())) {
-                return ApiResponse.error("权限不足");
+            boolean verified = userService.verifySecurityAnswer(username, securityAnswer);
+            if (!verified) {
+                return ApiResponse.error("密保答案错误");
             }
-            userService.deleteUser(id);
-            return ApiResponse.success("删除成功");
+            userService.resetPassword(username, newPassword);
+            return ApiResponse.success("密码重置成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ApiResponse.error("删除失败: " + e.getMessage());
+            return ApiResponse.error("密码重置失败: " + e.getMessage());
         }
     }
 
-    @PutMapping("/{id}")
-    public ApiResponse updateUser(@PathVariable Long id, @RequestBody User user, HttpSession session) {
-        try {
-            User currentUser = (User) session.getAttribute("user");
-            if (currentUser == null || !"admin".equals(currentUser.getRole())) {
-                return ApiResponse.error("权限不足");
-            }
-            user.setId(id);
-            userService.updateUser(user);
-            return ApiResponse.success("更新成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ApiResponse.error("更新失败: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/security/question")
-    public ApiResponse getSecurityQuestion(@RequestParam String username) {
+    @GetMapping("/security-question/{username}")
+    public ApiResponse getSecurityQuestion(@PathVariable String username) {
         try {
             String question = userService.getSecurityQuestion(username);
             return ApiResponse.success("获取成功", question);
@@ -137,33 +149,5 @@ public class UserController {
             e.printStackTrace();
             return ApiResponse.error("获取失败: " + e.getMessage());
         }
-    }
-
-    @PostMapping("/security/verify")
-    public ApiResponse verifySecurityAnswer(@RequestParam String username, @RequestParam String answer) {
-        try {
-            boolean result = userService.verifySecurityAnswer(username, answer);
-            return ApiResponse.success("验证成功", result);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ApiResponse.error("验证失败: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/password/reset")
-    public ApiResponse resetPassword(@RequestParam String username, @RequestParam String newPassword) {
-        try {
-            userService.resetPassword(username, newPassword);
-            return ApiResponse.success("重置成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ApiResponse.error("重置失败: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/logout")
-    public ApiResponse logout(HttpSession session) {
-        session.invalidate();
-        return ApiResponse.success("退出成功");
     }
 }

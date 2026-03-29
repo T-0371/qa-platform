@@ -24,8 +24,7 @@ public class CollectController {
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            
-            Collect collect = collectService.addCollect(user.getId(), questionId);
+            Collect collect = collectService.collectQuestion(questionId, user.getId());
             return ApiResponse.success("收藏成功", collect);
         } catch (Exception e) {
             e.printStackTrace();
@@ -33,15 +32,14 @@ public class CollectController {
         }
     }
 
-    @DeleteMapping("/{questionId}")
-    public ApiResponse removeCollect(@PathVariable Long questionId, HttpSession session) {
+    @DeleteMapping("/{id}")
+    public ApiResponse removeCollect(@PathVariable Long id, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            
-            collectService.removeCollect(user.getId(), questionId);
+            collectService.cancelCollect(id, user.getId());
             return ApiResponse.success("取消收藏成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,12 +54,26 @@ public class CollectController {
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            
             List<Collect> collects = collectService.getUserCollects(user.getId());
-            return ApiResponse.success("获取收藏列表成功", collects);
+            return ApiResponse.success("获取成功", collects);
         } catch (Exception e) {
             e.printStackTrace();
-            return ApiResponse.error("获取收藏列表失败: " + e.getMessage());
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/check")
+    public ApiResponse checkCollect(@RequestParam Long questionId, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ApiResponse.error("用户未登录");
+            }
+            boolean collected = collectService.isCollected(questionId, user.getId());
+            return ApiResponse.success("检查成功", collected);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("检查失败: " + e.getMessage());
         }
     }
 }

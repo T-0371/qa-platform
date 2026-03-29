@@ -1,6 +1,6 @@
 package com.example.qa.controller;
 
-import com.example.qa.dto.request.AnswerRequest;
+import com.example.qa.dto.request.AnswerCreateRequest;
 import com.example.qa.dto.response.ApiResponse;
 import com.example.qa.entity.Answer;
 import com.example.qa.entity.User;
@@ -30,13 +30,13 @@ public class AnswerController {
     }
 
     @PostMapping
-    public ApiResponse createAnswer(@RequestBody AnswerRequest answerRequest, HttpSession session) {
+    public ApiResponse createAnswer(@RequestParam Long questionId, @RequestBody AnswerCreateRequest answerRequest, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            Answer answer = answerService.createAnswer(answerRequest.getQuestionId(), answerRequest.getContent(), user.getId());
+            Answer answer = answerService.createAnswer(questionId, answerRequest, user.getId());
             return ApiResponse.success("创建成功", answer);
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,9 +45,11 @@ public class AnswerController {
     }
 
     @GetMapping("/question/{questionId}")
-    public ApiResponse getAnswersByQuestionId(@PathVariable Long questionId) {
+    public ApiResponse getAnswersByQuestionId(@PathVariable Long questionId, 
+                                             @RequestParam(defaultValue = "1") int page, 
+                                             @RequestParam(defaultValue = "10") int size) {
         try {
-            List<Answer> answers = answerService.getAnswersByQuestionId(questionId);
+            List<Answer> answers = answerService.getAnswersByQuestionId(questionId, page, size);
             return ApiResponse.success("获取成功", answers);
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,13 +58,13 @@ public class AnswerController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse updateAnswer(@PathVariable Long id, @RequestBody AnswerRequest answerRequest, HttpSession session) {
+    public ApiResponse updateAnswer(@PathVariable Long id, @RequestBody AnswerCreateRequest answerRequest, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            answerService.updateAnswer(id, answerRequest.getContent(), user.getId());
+            answerService.updateAnswer(id, answerRequest, user.getId());
             return ApiResponse.success("更新成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -86,13 +88,13 @@ public class AnswerController {
     }
 
     @PutMapping("/{id}/accept")
-    public ApiResponse acceptAnswer(@PathVariable Long id, HttpSession session) {
+    public ApiResponse acceptAnswer(@PathVariable Long id, @RequestParam Long questionId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            answerService.acceptAnswer(id, user.getId());
+            answerService.acceptAnswer(id, questionId, user.getId());
             return ApiResponse.success("采纳成功");
         } catch (Exception e) {
             e.printStackTrace();

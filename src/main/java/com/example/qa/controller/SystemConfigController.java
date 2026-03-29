@@ -1,59 +1,48 @@
 package com.example.qa.controller;
 
 import com.example.qa.dto.response.ApiResponse;
-import com.example.qa.entity.User;
+import com.example.qa.entity.SystemConfig;
 import com.example.qa.service.SystemConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
-
 @RestController
-@RequestMapping("/system")
+@RequestMapping("/system-config")
 public class SystemConfigController {
 
     @Autowired
     private SystemConfigService systemConfigService;
 
-    @GetMapping("/config")
+    @GetMapping
     public ApiResponse getSystemConfig() {
         try {
-            return ApiResponse.success("获取系统配置成功", systemConfigService.getSystemConfig());
+            SystemConfig config = systemConfigService.getConfig();
+            return ApiResponse.success("获取成功", config);
         } catch (Exception e) {
             e.printStackTrace();
-            return ApiResponse.error("获取系统配置失败: " + e.getMessage());
+            return ApiResponse.error("获取失败: " + e.getMessage());
         }
     }
 
-    @PutMapping("/config")
-    public ApiResponse updateSystemConfig(@RequestParam String key, @RequestParam String value, HttpSession session) {
+    @PutMapping
+    public ApiResponse updateSystemConfig(@RequestBody SystemConfig config) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null || !"admin".equals(user.getRole())) {
-                return ApiResponse.error("权限不足");
-            }
-            
-            systemConfigService.updateSystemConfig(key, value);
-            return ApiResponse.success("更新系统配置成功");
+            SystemConfig updatedConfig = systemConfigService.updateConfig(config);
+            return ApiResponse.success("更新成功", updatedConfig);
         } catch (Exception e) {
             e.printStackTrace();
-            return ApiResponse.error("更新系统配置失败: " + e.getMessage());
+            return ApiResponse.error("更新失败: " + e.getMessage());
         }
     }
 
-    @PostMapping("/refresh")
-    public ApiResponse refreshSystemConfig(HttpSession session) {
+    @PostMapping("/reset")
+    public ApiResponse resetSystemConfig() {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null || !"admin".equals(user.getRole())) {
-                return ApiResponse.error("权限不足");
-            }
-            
-            systemConfigService.refreshSystemConfig();
-            return ApiResponse.success("刷新系统配置成功");
+            SystemConfig defaultConfig = systemConfigService.resetToDefault();
+            return ApiResponse.success("重置成功", defaultConfig);
         } catch (Exception e) {
             e.printStackTrace();
-            return ApiResponse.error("刷新系统配置失败: " + e.getMessage());
+            return ApiResponse.error("重置失败: " + e.getMessage());
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.example.qa.controller;
 
-import com.example.qa.dto.request.QuestionRequest;
+import com.example.qa.dto.request.QuestionCreateRequest;
 import com.example.qa.dto.response.ApiResponse;
 import com.example.qa.entity.Question;
 import com.example.qa.entity.User;
@@ -19,19 +19,14 @@ public class QuestionController {
     private QuestionService questionService;
 
     @PostMapping
-    public ApiResponse createQuestion(@RequestBody QuestionRequest questionRequest, HttpSession session) {
+    public ApiResponse createQuestion(@RequestBody QuestionCreateRequest questionRequest, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
             
-            Question question = questionService.createQuestion(
-                questionRequest.getTitle(),
-                questionRequest.getContent(),
-                questionRequest.getTagIds(),
-                user.getId()
-            );
+            Question question = questionService.createQuestion(questionRequest, user.getId());
             return ApiResponse.success("创建成功", question);
         } catch (Exception e) {
             e.printStackTrace();
@@ -42,12 +37,10 @@ public class QuestionController {
     @GetMapping
     public ApiResponse getQuestions(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(defaultValue = "10") int size) {
         try {
-            List<Question> questions = questionService.getQuestions(page, size, keyword);
-            long total = questionService.getQuestionCount(keyword);
-            return ApiResponse.success("获取成功", Map.of("list", questions, "total", total));
+            List<Question> questions = questionService.getQuestionList(page, size);
+            return ApiResponse.success("获取成功", questions);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("获取失败: " + e.getMessage());
@@ -71,7 +64,7 @@ public class QuestionController {
     @GetMapping("/detail/{id}")
     public ApiResponse getQuestionDetail(@PathVariable Long id) {
         try {
-            Question question = questionService.getQuestionDetail(id);
+            Question question = questionService.getQuestionByIdWithoutViewCount(id);
             if (question == null) {
                 return ApiResponse.error("问题不存在");
             }
@@ -83,7 +76,7 @@ public class QuestionController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse updateQuestion(@PathVariable Long id, @RequestBody QuestionRequest questionRequest, HttpSession session) {
+    public ApiResponse updateQuestion(@PathVariable Long id, @RequestBody QuestionCreateRequest questionRequest, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
@@ -98,7 +91,7 @@ public class QuestionController {
                 return ApiResponse.error("权限不足");
             }
             
-            questionService.updateQuestion(id, questionRequest.getTitle(), questionRequest.getContent(), questionRequest.getTagIds());
+            questionService.updateQuestion(id, questionRequest, user.getId());
             return ApiResponse.success("更新成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,7 +115,7 @@ public class QuestionController {
                 return ApiResponse.error("权限不足");
             }
             
-            questionService.deleteQuestion(id);
+            questionService.deleteQuestion(id, user.getId());
             return ApiResponse.success("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -131,9 +124,9 @@ public class QuestionController {
     }
 
     @GetMapping("/hot/list")
-    public ApiResponse getHotQuestions() {
+    public ApiResponse getHotQuestions(@RequestParam(defaultValue = "10") int limit) {
         try {
-            List<Question> questions = questionService.getHotQuestions();
+            List<Question> questions = questionService.getHotQuestions(limit);
             return ApiResponse.success("获取成功", questions);
         } catch (Exception e) {
             e.printStackTrace();
@@ -142,9 +135,9 @@ public class QuestionController {
     }
 
     @GetMapping("/latest/list")
-    public ApiResponse getLatestQuestions() {
+    public ApiResponse getLatestQuestions(@RequestParam(defaultValue = "10") int limit) {
         try {
-            List<Question> questions = questionService.getLatestQuestions();
+            List<Question> questions = questionService.getLatestQuestions(limit);
             return ApiResponse.success("获取成功", questions);
         } catch (Exception e) {
             e.printStackTrace();
@@ -153,9 +146,11 @@ public class QuestionController {
     }
 
     @GetMapping("/search")
-    public ApiResponse searchQuestions(@RequestParam String keyword) {
+    public ApiResponse searchQuestions(@RequestParam String keyword, 
+                                      @RequestParam(defaultValue = "1") int page, 
+                                      @RequestParam(defaultValue = "10") int size) {
         try {
-            List<Question> questions = questionService.searchQuestions(keyword);
+            List<Question> questions = questionService.searchQuestions(keyword, page, size);
             return ApiResponse.success("搜索成功", questions);
         } catch (Exception e) {
             e.printStackTrace();

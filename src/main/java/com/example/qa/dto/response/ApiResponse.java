@@ -38,6 +38,21 @@ public class ApiResponse<T> {
     }
     
     /**
+     * 成功响应（带消息）
+     * @param message 响应消息
+     * @param data 响应数据
+     * @param <T> 数据类型
+     * @return ApiResponse实例
+     */
+    public static <T> ApiResponse<T> success(String message, T data) {
+        ApiResponse<T> response = new ApiResponse<>();
+        response.setCode(200);
+        response.setMessage(message);
+        response.setData(data);
+        return response;
+    }
+    
+    /**
      * 失败响应
      * @param code 错误码
      * @param message 错误消息
@@ -49,5 +64,15 @@ public class ApiResponse<T> {
         response.setCode(code);
         response.setMessage(message);
         return response;
+    }
+    
+    /**
+     * 失败响应（默认错误码）
+     * @param message 错误消息
+     * @param <T> 数据类型
+     * @return ApiResponse实例
+     */
+    public static <T> ApiResponse<T> error(String message) {
+        return error(500, message);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.qa.controller;
 
+import com.example.qa.dto.request.CommentCreateRequest;
 import com.example.qa.dto.response.ApiResponse;
 import com.example.qa.entity.Comment;
 import com.example.qa.entity.User;
@@ -18,13 +19,13 @@ public class CommentController {
     private CommentService commentService;
 
     @PostMapping
-    public ApiResponse createComment(@RequestParam Long targetId, @RequestParam String targetType, @RequestParam String content, HttpSession session) {
+    public ApiResponse createComment(@RequestBody CommentCreateRequest request, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            Comment comment = commentService.createComment(user.getId(), targetId, targetType, content);
+            Comment comment = commentService.createComment(request, user.getId());
             return ApiResponse.success("创建成功", comment);
         } catch (Exception e) {
             e.printStackTrace();
@@ -33,9 +34,9 @@ public class CommentController {
     }
 
     @GetMapping
-    public ApiResponse getComments(@RequestParam Long targetId, @RequestParam String targetType) {
+    public ApiResponse getComments(@RequestParam String targetType, @RequestParam Long targetId) {
         try {
-            List<Comment> comments = commentService.getComments(targetId, targetType);
+            List<Comment> comments = commentService.getCommentsByTarget(targetType, targetId);
             return ApiResponse.success("获取成功", comments);
         } catch (Exception e) {
             e.printStackTrace();
@@ -50,8 +51,8 @@ public class CommentController {
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            commentService.updateComment(id, content, user.getId());
-            return ApiResponse.success("更新成功");
+            Comment comment = commentService.updateComment(id, content, user.getId());
+            return ApiResponse.success("更新成功", comment);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("更新失败: " + e.getMessage());

@@ -24,7 +24,7 @@ public class NotificationController {
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            List<Notification> notifications = notificationService.getNotifications(user.getId());
+            List<Notification> notifications = notificationService.getAllNotifications(user.getId());
             return ApiResponse.success("获取成功", notifications);
         } catch (Exception e) {
             e.printStackTrace();
@@ -99,7 +99,7 @@ public class NotificationController {
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
-            notificationService.deleteNotification(id, user.getId());
+            notificationService.deleteNotification(id);
             return ApiResponse.success("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
