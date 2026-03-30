@@ -25,6 +25,7 @@
   ],
   "healthCheck": {
     "path": "/health",
+    "port": 8080,
     "interval": 30,
     "timeout": 10,
     "startupTimeout": 60
