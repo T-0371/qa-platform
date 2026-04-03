@@ -1,5 +1,6 @@
 spring:
   datasource:
+    # 使用环境变量占位符，运行时由 Render 注入真实值
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&connectTimeout=20000&socketTimeout=30000
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
@@ -13,23 +14,26 @@ spring:
       pool-name: QAHikariCP
       connection-test-query: SELECT 1
       leak-detection-threshold: 60000
+
   servlet:
     multipart:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
+
   web:
     resources:
       static-locations: classpath:/static/,file:/app/uploads/
       cache:
         period: 86400
+
   jmx:
     enabled: false
+
   sql:
     init:
       mode: never
-      schema-locations: classpath:qa_platform.sql,classpath:message_table.sql,classpath:system_config.sql
-      encoding: UTF-8
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -48,12 +52,10 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
-      table-prefix:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
     banner: false
-    enable-auto-merge-sql: true
 
 springdoc:
   api-docs:
@@ -62,14 +64,11 @@ springdoc:
     path: /swagger-ui.html
 
 server:
-  port: 8080
+  port: ${PORT:8080}
   address: 0.0.0.0
   compression:
     enabled: false
-    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json
-    min-response-size: 1024
 
-# 禁用 Actuator
 management:
   enabled: false
 
