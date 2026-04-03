@@ -11,7 +11,8 @@
     "restartPolicyMaxRetries": 10
   },
   "environmentVariables": {
-    "SPRING_PROFILES_ACTIVE": "prod"
+    "SPRING_PROFILES_ACTIVE": "prod",
+    "PORT": "8080"
   },
   "database": {
     "plugin": "mysql"
