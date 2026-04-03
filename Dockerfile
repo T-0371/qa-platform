@@ -1,8 +1,8 @@
-# 使用官方 Java 11 镜像
-FROM openjdk:11-jdk-slim
+# 使用 Eclipse Temurin Java 11 镜像（OpenJDK 的替代品）
+FROM eclipse-temurin:11-jdk-alpine
 
 # 设置环境变量
-ENV JAVA_HOME=/usr/local/openjdk-11
+ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
 
 # 设置工作目录
