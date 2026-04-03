@@ -3,7 +3,7 @@
   "build": {
     "builder": "NIXPACKS",
     "buildCommand": "mvn clean package -DskipTests",
-    "runCommand": "java -Xmx256m -Xms64m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=64m -jar target/qa-platform.jar --spring.profiles.active=prod"
+    "runCommand": "java -Xmx256m -Xms64m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=64m -jar target/qa-platform.jar --spring.profiles.active=prod --server.port=${PORT:-8080}"
   },
   "deploy": {
     "numInstances": 1,
