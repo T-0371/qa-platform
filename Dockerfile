@@ -1,31 +1,17 @@
-# Use Java 11 as base image
-FROM eclipse-temurin:11-jdk-alpine
+# 使用官方 Java 11 镜像
+FROM openjdk:11-jdk-slim
 
-# Set working directory
+# 设置工作目录
 WORKDIR /app
 
-# Install Maven
-RUN apk add --no-cache maven
-
-# Copy project files
+# 复制项目文件
 COPY . .
 
-# Build the project
-RUN mvn clean package -DskipTests
+# 给 mvnw 添加执行权限
+RUN chmod +x mvnw
 
-# Expose port
-EXPOSE 8080
+# 构建项目
+RUN ./mvnw clean package -DskipTests
 
-# Set environment variables with default values
-ENV PORT=8080
-ENV SPRING_PROFILES_ACTIVE=prod
-
-# Set database environment variables with default values
-ENV DB_HOST=localhost
-ENV DB_PORT=3306
-ENV DB_NAME=qa_platform
-ENV DB_USERNAME=root
-ENV DB_PASSWORD=123456
-
-# Run the application
-CMD java -Dserver.port=8080 -jar target/qa-platform.jar --spring.profiles.active=prod
+# 运行应用
+CMD ["java", "-Xmx256m", "-Xms64m", "-XX:MaxMetaspaceSize=128m", "-jar", "target/qa-platform.jar", "--spring.profiles.active=prod"]

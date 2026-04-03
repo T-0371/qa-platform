@@ -1,10 +1,8 @@
 # Render configuration for Java Spring Boot application
 type: web
 name: qa-platform
-env: java
-javaVersion: 11
-buildCommand: ./mvnw clean package -DskipTests
-startCommand: java -Xmx256m -Xms64m -XX:MaxMetaspaceSize=128m -jar target/qa-platform.jar --spring.profiles.active=prod
+env: docker
+dockerfilePath: Dockerfile
 healthCheckPath: /health
 envVars:
   - key: SPRING_PROFILES_ACTIVE
