@@ -1,6 +1,10 @@
 # 使用官方 Java 11 镜像
 FROM openjdk:11-jdk-slim
 
+# 设置环境变量
+ENV JAVA_HOME=/usr/local/openjdk-11
+ENV PATH=$JAVA_HOME/bin:$PATH
+
 # 设置工作目录
 WORKDIR /app
 
