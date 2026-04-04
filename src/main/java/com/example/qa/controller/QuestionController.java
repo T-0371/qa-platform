@@ -28,16 +28,18 @@ public class QuestionController {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (questionRequest.getUserId() == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(questionRequest.getUserId());
             }
-            
+
             Question question = questionService.createQuestion(questionRequest, user.getId());
-            
-            // 从配置中读取积分奖励
+
             PointsConfig config = pointsConfigService.getCurrentConfig();
             int rewardPoints = config != null && config.getQuestionReward() != null ? config.getQuestionReward() : 5;
-            
-            // 返回成功消息，包含积分提示
+
             return ApiResponse.success("发布成功！获得 " + rewardPoints + " 积分奖励", question);
         } catch (Exception e) {
             e.printStackTrace();
