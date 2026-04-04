@@ -121,4 +121,22 @@ public class HotQuestionConfigController {
             return ApiResponse.error("获取失败: " + e.getMessage());
         }
     }
+
+    @PostMapping("/preview")
+    public ApiResponse previewHotConfig(@RequestBody HotQuestionConfig config) {
+        try {
+            List hotQuestions = questionService.getHotQuestionsByConfig(
+                    config.getTimeRangeDays(),
+                    config.getMinViewCount(),
+                    config.getMinAnswerCount(),
+                    config.getMinVoteCount(),
+                    config.getSortBy(),
+                    config.getDisplayCount()
+            );
+            return ApiResponse.success("预览成功", hotQuestions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("预览失败: " + e.getMessage());
+        }
+    }
 }

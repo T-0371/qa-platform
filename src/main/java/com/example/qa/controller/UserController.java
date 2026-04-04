@@ -48,6 +48,8 @@ public class UserController {
             if (user == null) {
                 return ApiResponse.error("用户未登录");
             }
+            // 清除数据库中的登录令牌
+            userService.logout(user.getId());
             session.invalidate();
             return ApiResponse.success("退出成功");
         } catch (Exception e) {
@@ -102,6 +104,24 @@ public class UserController {
     public ApiResponse getAllUsers() {
         try {
             List<User> users = userService.getAllUsers();
+            return ApiResponse.success("获取成功", users);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping
+    public ApiResponse getUsers(@RequestParam(defaultValue = "1") int page, 
+                               @RequestParam(defaultValue = "10") int size, 
+                               @RequestParam(required = false) String keyword) {
+        try {
+            List<User> users;
+            if (keyword != null && !keyword.isEmpty()) {
+                users = userService.searchUsers(keyword);
+            } else {
+                users = userService.getAllUsers();
+            }
             return ApiResponse.success("获取成功", users);
         } catch (Exception e) {
             e.printStackTrace();

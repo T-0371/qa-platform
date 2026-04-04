@@ -34,6 +34,17 @@ public class SystemConfigController {
             return ApiResponse.error("更新失败: " + e.getMessage());
         }
     }
+    
+    @PostMapping
+    public ApiResponse saveSystemConfig(@RequestBody SystemConfig config) {
+        try {
+            SystemConfig updatedConfig = systemConfigService.updateConfig(config);
+            return ApiResponse.success("保存成功", updatedConfig);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("保存失败: " + e.getMessage());
+        }
+    }
 
     @PostMapping("/reset")
     public ApiResponse resetSystemConfig() {
