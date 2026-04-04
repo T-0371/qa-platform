@@ -47,6 +47,28 @@ public class QuestionController {
         }
     }
 
+    @GetMapping("/hot/list")
+    public ApiResponse getHotQuestions(@RequestParam(defaultValue = "10") int limit) {
+        try {
+            List<Question> questions = questionService.getHotQuestions(limit);
+            return ApiResponse.success("获取成功", questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/latest/list")
+    public ApiResponse getLatestQuestions(@RequestParam(defaultValue = "10") int limit) {
+        try {
+            List<Question> questions = questionService.getLatestQuestions(limit);
+            return ApiResponse.success("获取成功", questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}")
     public ApiResponse getQuestionById(@PathVariable Long id) {
         try {
@@ -120,28 +142,6 @@ public class QuestionController {
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("删除失败: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/hot/list")
-    public ApiResponse getHotQuestions(@RequestParam(defaultValue = "10") int limit) {
-        try {
-            List<Question> questions = questionService.getHotQuestions(limit);
-            return ApiResponse.success("获取成功", questions);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ApiResponse.error("获取失败: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/latest/list")
-    public ApiResponse getLatestQuestions(@RequestParam(defaultValue = "10") int limit) {
-        try {
-            List<Question> questions = questionService.getLatestQuestions(limit);
-            return ApiResponse.success("获取成功", questions);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ApiResponse.error("获取失败: " + e.getMessage());
         }
     }
 

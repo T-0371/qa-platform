@@ -101,7 +101,17 @@ public class UserServiceImpl implements UserService {
         System.out.println("=== Current loginToken from DB: " + user.getLoginToken() + " ===");
         System.out.println("=== ForceLogin: " + request.getForceLogin() + " ===");
         
-        if (user.getLoginToken() != null && !Boolean.TRUE.equals(request.getForceLogin())) {
+        // 检查登录令牌是否过期（24小时过期）
+        boolean tokenExpired = false;
+        if (user.getLoginTime() != null) {
+            long hoursSinceLogin = (System.currentTimeMillis() - user.getLoginTime().getTime()) / (1000 * 60 * 60);
+            if (hoursSinceLogin >= 24) {
+                tokenExpired = true;
+                System.out.println("=== Login token expired, allowing new login ===");
+            }
+        }
+        
+        if (user.getLoginToken() != null && !Boolean.TRUE.equals(request.getForceLogin()) && !tokenExpired) {
             System.out.println("=== LOGIN_CONFLICT detected! ===");
             throw new RuntimeException("LOGIN_CONFLICT");
         }
