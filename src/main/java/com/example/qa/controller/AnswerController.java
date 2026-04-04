@@ -68,6 +68,25 @@ public class AnswerController {
         }
     }
 
+    @PostMapping("/questions/{questionId}")
+    public ApiResponse createAnswerAlt(@PathVariable Long questionId, @RequestBody AnswerCreateRequest answerRequest, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                if (answerRequest.getUserId() == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(answerRequest.getUserId());
+            }
+            Answer answer = answerService.createAnswer(questionId, answerRequest, user.getId());
+            return ApiResponse.success("创建成功", answer);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("创建失败: " + e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}")
     public ApiResponse updateAnswer(@PathVariable Long id, @RequestBody AnswerCreateRequest answerRequest, HttpSession session) {
         try {
