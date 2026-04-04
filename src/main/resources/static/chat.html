@@ -954,6 +954,12 @@
                         console.log('收到广播消息:', chatMessage);
                         handleIncomingMessage(chatMessage);
                     });
+
+                    stompClient.subscribe('/topic/messages/user/' + currentUser.id, function(message) {
+                        const chatMessage = JSON.parse(message.body);
+                        console.log('收到用户特定消息:', chatMessage);
+                        handleIncomingMessage(chatMessage);
+                    });
                     
                     // 订阅用户状态消息
                     stompClient.subscribe('/topic/status', function(message) {

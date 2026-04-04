@@ -24,20 +24,32 @@ public class ChatWebSocketHandler {
     @MessageMapping("/chat/send")
     public void sendMessage(@Payload Message message) {
         logger.info("========== 收到聊天消息 ==========");
-        logger.info("senderId={}, receiverId={}, content={}, questionId={}", 
+        logger.info("senderId={}, receiverId={}, content={}, questionId={}",
             message.getSenderId(), message.getReceiverId(), message.getContent(), message.getQuestionId());
-        
+
         try {
             Message savedMessage = messageService.sendMessage(message);
             logger.info("消息已保存到数据库, id={}", savedMessage.getId());
-            
+
+            messagingTemplate.convertAndSend(
+                "/topic/messages/user/" + savedMessage.getReceiverId(),
+                savedMessage
+            );
+            logger.info("消息已发送到接收者主题: /topic/messages/user/{}", savedMessage.getReceiverId());
+
+            messagingTemplate.convertAndSend(
+                "/topic/messages/user/" + savedMessage.getSenderId(),
+                savedMessage
+            );
+            logger.info("消息已发送到发送者主题: /topic/messages/user/{}", savedMessage.getSenderId());
+
             messagingTemplate.convertAndSend(
                 "/topic/messages",
                 savedMessage
             );
             logger.info("消息已广播到 /topic/messages");
             logger.info("========== 消息发送完成 ==========");
-            
+
         } catch (Exception e) {
             logger.error("发送消息失败: ", e);
             e.printStackTrace();
