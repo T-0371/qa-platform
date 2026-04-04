@@ -713,8 +713,7 @@ async function loadSystemConfig() {
     var cacheTime = localStorage.getItem('systemConfigTime');
     var now = Date.now();
     
-    // 减少缓存时间到30秒，确保配置能够更快更新
-    if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 30000) {
+    if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 5000) {
         try {
             var config = JSON.parse(cachedConfig);
             applySystemConfig(config);

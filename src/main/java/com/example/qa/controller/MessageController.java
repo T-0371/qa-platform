@@ -141,7 +141,10 @@ public class MessageController {
             if (targetUser == null) {
                 return ApiResponse.error("用户不存在");
             }
-            return ApiResponse.success("获取成功", targetUser.getPoints());
+            java.util.Map<String, Object> result = new java.util.HashMap<>();
+            result.put("points", targetUser.getPoints());
+            result.put("username", targetUser.getUsername());
+            return ApiResponse.success("获取成功", result);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("获取失败: " + e.getMessage());
