@@ -2349,9 +2349,6 @@
                     localStorage.removeItem('systemConfig');
                     localStorage.removeItem('systemConfigTime');
                     
-                    // 重新加载配置
-                    await loadSystemConfig();
-                    
                     // 通过WebSocket通知其他页面配置已更新
                     if (stompClient && stompClient.connected) {
                         const configNotification = {
@@ -2360,10 +2357,18 @@
                         };
                         stompClient.send('/app/chat/send', {}, JSON.stringify(configNotification));
                     }
+                    
+                    // 重新加载配置（使用try-catch避免影响保存结果）
+                    try {
+                        await loadSystemConfig();
+                    } catch (loadError) {
+                        console.error('重新加载配置失败:', loadError);
+                    }
                 } else {
                     showMessage('保存失败: ' + data.message, 'error');
                 }
             } catch (error) {
+                console.error('保存系统配置失败:', error);
                 showMessage('保存失败', 'error');
             }
         }

@@ -7,11 +7,13 @@ import com.example.qa.dto.request.AnswerCreateRequest;
 import com.example.qa.entity.Answer;
 import com.example.qa.entity.Question;
 import com.example.qa.entity.User;
+import com.example.qa.entity.PointsConfig;
 import com.example.qa.mapper.AnswerMapper;
 import com.example.qa.mapper.QuestionMapper;
 import com.example.qa.mapper.UserMapper;
 import com.example.qa.service.AnswerService;
 import com.example.qa.service.NotificationService;
+import com.example.qa.service.PointsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,9 @@ public class AnswerServiceImpl implements AnswerService {
     
     @Autowired
     private NotificationService notificationService;
+    
+    @Autowired
+    private PointsConfigService pointsConfigService;
     
     /**
      * 获取所有回答
@@ -88,6 +93,16 @@ public class AnswerServiceImpl implements AnswerService {
                 userId,
                 fromUsername
             );
+        }
+        
+        // 回答奖励积分（从配置中读取）
+        User answerUser = userMapper.selectById(userId);
+        if (answerUser != null) {
+            PointsConfig config = pointsConfigService.getCurrentConfig();
+            int rewardPoints = config != null && config.getAnswerReward() != null ? config.getAnswerReward() : 5;
+            answerUser.setPoints(answerUser.getPoints() + rewardPoints);
+            userMapper.updateById(answerUser);
+            System.out.println("=== 用户 " + answerUser.getUsername() + " 回答问题获得 " + rewardPoints + " 积分 ===");
         }
         
         return answer;

@@ -35,6 +35,11 @@ public class UserController {
             User user = userService.login(request);
             session.setAttribute("user", user);
             return ApiResponse.success("登录成功", user);
+        } catch (RuntimeException e) {
+            if ("LOGIN_CONFLICT".equals(e.getMessage())) {
+                return ApiResponse.error(409, "您的账号已在其他设备登录，如需继续登录请确认");
+            }
+            return ApiResponse.error("登录失败: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("登录失败: " + e.getMessage());
@@ -168,6 +173,29 @@ public class UserController {
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse updateUserById(@PathVariable Long id, @RequestBody User user) {
+        try {
+            user.setId(id);
+            User updatedUser = userService.updateUser(user);
+            return ApiResponse.success("更新成功", updatedUser);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("更新失败: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse deleteUserById(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ApiResponse.success("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("删除失败: " + e.getMessage());
         }
     }
 }

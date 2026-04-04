@@ -80,6 +80,28 @@ public class QuestionController {
         }
     }
 
+    @GetMapping("/hot")
+    public ApiResponse getHotQuestionsByParam(@RequestParam(defaultValue = "10") int limit) {
+        try {
+            List<Question> questions = questionService.getHotQuestions(limit);
+            return ApiResponse.success("获取成功", questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/latest")
+    public ApiResponse getLatestQuestionsByParam(@RequestParam(defaultValue = "10") int limit) {
+        try {
+            List<Question> questions = questionService.getLatestQuestions(limit);
+            return ApiResponse.success("获取成功", questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}")
     public ApiResponse getQuestionById(@PathVariable Long id) {
         try {
