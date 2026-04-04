@@ -7,6 +7,7 @@ import com.example.qa.dto.request.QuestionCreateRequest;
 import com.example.qa.entity.Question;
 import com.example.qa.entity.QuestionTag;
 import com.example.qa.entity.User;
+import com.example.qa.entity.PointsConfig;
 import com.example.qa.mapper.QuestionMapper;
 import com.example.qa.mapper.QuestionTagMapper;
 import com.example.qa.mapper.AnswerMapper;
@@ -15,6 +16,7 @@ import com.example.qa.mapper.VoteMapper;
 import com.example.qa.mapper.CollectMapper;
 import com.example.qa.mapper.UserMapper;
 import com.example.qa.service.QuestionService;
+import com.example.qa.service.PointsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +52,9 @@ public class QuestionServiceImpl implements QuestionService {
     @Autowired
     private UserMapper userMapper;
     
+    @Autowired
+    private PointsConfigService pointsConfigService;
+    
     /**
      * 创建问题
      * @param request 问题创建请求
@@ -82,6 +87,16 @@ public class QuestionServiceImpl implements QuestionService {
                 questionTag.setTagId(tagId);
                 questionTagMapper.insert(questionTag);
             }
+        }
+        
+        // 发布问题奖励积分（从配置中读取）
+        User user = userMapper.selectById(userId);
+        if (user != null) {
+            PointsConfig config = pointsConfigService.getCurrentConfig();
+            int rewardPoints = config != null && config.getQuestionReward() != null ? config.getQuestionReward() : 5;
+            user.setPoints(user.getPoints() + rewardPoints);
+            userMapper.updateById(user);
+            System.out.println("=== 用户 " + user.getUsername() + " 发布问题获得 " + rewardPoints + " 积分 ===");
         }
         
         return question;

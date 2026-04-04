@@ -38,6 +38,12 @@ public class DatabaseMigrationConfig {
             } else {
                 System.out.println("login_token 字段已存在，跳过迁移。");
             }
+            
+            // 应用启动时清空所有用户的登录令牌（测试期间）
+            System.out.println("清空所有用户的登录令牌...");
+            jdbcTemplate.execute("UPDATE user SET login_token = NULL, login_time = NULL");
+            System.out.println("登录令牌已清空！");
+            
         } catch (Exception e) {
             System.err.println("数据库迁移失败: " + e.getMessage());
             e.printStackTrace();

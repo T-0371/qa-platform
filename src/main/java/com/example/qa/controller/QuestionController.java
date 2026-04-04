@@ -4,7 +4,9 @@ import com.example.qa.dto.request.QuestionCreateRequest;
 import com.example.qa.dto.response.ApiResponse;
 import com.example.qa.entity.Question;
 import com.example.qa.entity.User;
+import com.example.qa.entity.PointsConfig;
 import com.example.qa.service.QuestionService;
+import com.example.qa.service.PointsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,9 @@ public class QuestionController {
     @Autowired
     private QuestionService questionService;
 
+    @Autowired
+    private PointsConfigService pointsConfigService;
+
     @PostMapping
     public ApiResponse createQuestion(@RequestBody QuestionCreateRequest questionRequest, HttpSession session) {
         try {
@@ -27,7 +32,13 @@ public class QuestionController {
             }
             
             Question question = questionService.createQuestion(questionRequest, user.getId());
-            return ApiResponse.success("创建成功", question);
+            
+            // 从配置中读取积分奖励
+            PointsConfig config = pointsConfigService.getCurrentConfig();
+            int rewardPoints = config != null && config.getQuestionReward() != null ? config.getQuestionReward() : 5;
+            
+            // 返回成功消息，包含积分提示
+            return ApiResponse.success("发布成功！获得 " + rewardPoints + " 积分奖励", question);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("创建失败: " + e.getMessage());
