@@ -18,11 +18,15 @@ public class NotificationController {
     private NotificationService notificationService;
 
     @GetMapping
-    public ApiResponse getNotifications(HttpSession session) {
+    public ApiResponse getNotifications(@RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             List<Notification> notifications = notificationService.getAllNotifications(user.getId());
             return ApiResponse.success("获取成功", notifications);
@@ -108,11 +112,15 @@ public class NotificationController {
     }
 
     @DeleteMapping
-    public ApiResponse deleteAllNotifications(HttpSession session) {
+    public ApiResponse deleteAllNotifications(@RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             notificationService.deleteAllNotifications(user.getId());
             return ApiResponse.success("删除成功");
@@ -122,12 +130,35 @@ public class NotificationController {
         }
     }
 
-    @GetMapping("/type/{type}")
-    public ApiResponse getNotificationsByType(@PathVariable String type, HttpSession session) {
+    @PutMapping("/{notificationId}/read")
+    public ApiResponse markNotificationAsRead(@PathVariable Long notificationId, @RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
+            }
+            notificationService.markAsRead(notificationId);
+            return ApiResponse.success("标记成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("标记失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/type/{type}")
+    public ApiResponse getNotificationsByType(@PathVariable String type, @RequestParam(required = false) Long userId, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             List<Notification> notifications = notificationService.getNotificationsByType(user.getId(), type);
             return ApiResponse.success("获取成功", notifications);
