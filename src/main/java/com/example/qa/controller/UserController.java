@@ -64,12 +64,26 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ApiResponse getCurrentUser(HttpSession session) {
+    public ApiResponse getCurrentUser(@RequestParam(required = false) Long userId,
+                                      @RequestParam(required = false) String loginToken,
+                                      HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
+            
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null || loginToken == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                User dbUser = userService.getUserById(userId);
+                if (dbUser == null) {
+                    return ApiResponse.error("用户不存在");
+                }
+                if (dbUser.getLoginToken() == null || !dbUser.getLoginToken().equals(loginToken)) {
+                    return ApiResponse.error(401, "您的账号已在其他设备登录");
+                }
+                user = dbUser;
             }
+            
             return ApiResponse.success("获取成功", user);
         } catch (Exception e) {
             e.printStackTrace();

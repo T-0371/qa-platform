@@ -4,6 +4,7 @@ import com.example.qa.dto.response.ApiResponse;
 import com.example.qa.entity.Message;
 import com.example.qa.entity.User;
 import com.example.qa.service.MessageService;
+import com.example.qa.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,9 @@ public class MessageController {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/conversation")
     public ApiResponse getMessagesBetweenUsers(@RequestParam Long otherUserId, HttpSession session) {
@@ -124,6 +128,23 @@ public class MessageController {
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("检查失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/user/points")
+    public ApiResponse getUserPoints(@RequestParam Long userId, HttpSession session) {
+        try {
+            if (userId == null) {
+                return ApiResponse.error("用户ID不能为空");
+            }
+            User targetUser = userService.getUserById(userId);
+            if (targetUser == null) {
+                return ApiResponse.error("用户不存在");
+            }
+            return ApiResponse.success("获取成功", targetUser.getPoints());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
         }
     }
 }

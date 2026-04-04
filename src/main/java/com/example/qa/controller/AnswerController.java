@@ -45,11 +45,22 @@ public class AnswerController {
     }
 
     @GetMapping("/question/{questionId}")
-    public ApiResponse getAnswersByQuestionId(@PathVariable Long questionId, 
-                                             @RequestParam(defaultValue = "1") int page, 
+    public ApiResponse getAnswersByQuestionId(@PathVariable Long questionId,
+                                             @RequestParam(defaultValue = "1") int page,
                                              @RequestParam(defaultValue = "10") int size) {
         try {
             List<Answer> answers = answerService.getAnswersByQuestionId(questionId, page, size);
+            return ApiResponse.success("获取成功", answers);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/questions/{questionId}")
+    public ApiResponse getAnswersByQuestionIdAlt(@PathVariable Long questionId) {
+        try {
+            List<Answer> answers = answerService.getAnswersByQuestionId(questionId, 1, 50);
             return ApiResponse.success("获取成功", answers);
         } catch (Exception e) {
             e.printStackTrace();

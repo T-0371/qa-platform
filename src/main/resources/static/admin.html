@@ -2287,6 +2287,10 @@
         async function loadSystemConfig() {
             try {
                 const res = await fetch(API_BASE_URL + '/system-config');
+                if (!res.ok) {
+                    console.error('加载系统配置失败，HTTP状态:', res.status);
+                    return;
+                }
                 const data = await res.json();
                 
                 if (data.code === 200 && data.data) {
