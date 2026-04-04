@@ -109,20 +109,6 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ApiResponse getUserById(@PathVariable Long id) {
-        try {
-            User user = userService.getUserById(id);
-            if (user == null) {
-                return ApiResponse.error("用户不存在");
-            }
-            return ApiResponse.success("获取成功", user);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ApiResponse.error("获取失败: " + e.getMessage());
-        }
-    }
-
     @PostMapping("/reset-password")
     public ApiResponse resetPassword(@RequestParam String username, 
                                     @RequestParam String securityAnswer, 
@@ -145,6 +131,20 @@ public class UserController {
         try {
             String question = userService.getSecurityQuestion(username);
             return ApiResponse.success("获取成功", question);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse getUserById(@PathVariable Long id) {
+        try {
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return ApiResponse.error("用户不存在");
+            }
+            return ApiResponse.success("获取成功", user);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("获取失败: " + e.getMessage());

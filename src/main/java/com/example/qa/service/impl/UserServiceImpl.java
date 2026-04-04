@@ -101,18 +101,22 @@ public class UserServiceImpl implements UserService {
         System.out.println("=== Current loginToken from DB: " + user.getLoginToken() + " ===");
         System.out.println("=== ForceLogin: " + request.getForceLogin() + " ===");
         
-        // 检查登录令牌是否过期（24小时过期）
+        // 检查登录令牌是否过期（2小时过期，更宽松）
         boolean tokenExpired = false;
         if (user.getLoginTime() != null) {
             long hoursSinceLogin = (System.currentTimeMillis() - user.getLoginTime().getTime()) / (1000 * 60 * 60);
-            if (hoursSinceLogin >= 24) {
+            if (hoursSinceLogin >= 2) {
                 tokenExpired = true;
-                System.out.println("=== Login token expired, allowing new login ===");
+                System.out.println("=== Login token expired (" + hoursSinceLogin + " hours), allowing new login ===");
             }
         }
         
-        if (user.getLoginToken() != null && !Boolean.TRUE.equals(request.getForceLogin()) && !tokenExpired) {
-            System.out.println("=== LOGIN_CONFLICT detected! ===");
+        // 如果没有强制登录且令牌未过期且存在令牌，则抛出冲突
+        if (user.getLoginToken() != null && !user.getLoginToken().isEmpty() 
+                && !Boolean.TRUE.equals(request.getForceLogin()) 
+                && !tokenExpired) {
+            System.out.println("=== LOGIN_CONFLICT detected! Token age: " + 
+                ((System.currentTimeMillis() - user.getLoginTime().getTime()) / (1000 * 60)) + " minutes ===");
             throw new RuntimeException("LOGIN_CONFLICT");
         }
         

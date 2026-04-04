@@ -26,6 +26,20 @@ public class TagController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse getTagById(@PathVariable Long id) {
+        try {
+            Tag tag = tagService.getTagById(id);
+            if (tag == null) {
+                return ApiResponse.error("标签不存在");
+            }
+            return ApiResponse.success("获取成功", tag);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
+
     @PostMapping
     public ApiResponse createTag(@RequestBody Tag tag) {
         try {
@@ -56,20 +70,6 @@ public class TagController {
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("删除失败: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ApiResponse getTagById(@PathVariable Long id) {
-        try {
-            Tag tag = tagService.getTagById(id);
-            if (tag == null) {
-                return ApiResponse.error("标签不存在");
-            }
-            return ApiResponse.success("获取成功", tag);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ApiResponse.error("获取失败: " + e.getMessage());
         }
     }
 }
