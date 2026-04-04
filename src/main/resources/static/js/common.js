@@ -712,7 +712,7 @@ async function loadSystemConfig() {
     var cachedConfig = localStorage.getItem('systemConfig');
     var cacheTime = localStorage.getItem('systemConfigTime');
     var now = Date.now();
-    
+
     if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 5000) {
         try {
             var config = JSON.parse(cachedConfig);
@@ -722,26 +722,37 @@ async function loadSystemConfig() {
             console.error('解析缓存配置失败:', e);
         }
     }
-    
-    try {
-        var response = await fetch(API_BASE_URL + '/system-config?t=' + now);
-        var data = await response.json();
-        
-        if (data.code === 200 && data.data) {
-            var config = data.data;
-            localStorage.setItem('systemConfig', JSON.stringify(config));
-            localStorage.setItem('systemConfigTime', now.toString());
-            applySystemConfig(config);
-        }
-    } catch (error) {
-        console.error('加载系统配置失败:', error);
-        if (cachedConfig) {
-            try {
-                var config = JSON.parse(cachedConfig);
-                applySystemConfig(config);
-            } catch (e) {}
-        }
+
+    // 如果已经有请求正在进行中，等待该请求完成
+    if (loadSystemConfig.loading) {
+        return loadSystemConfig.loading;
     }
+
+    loadSystemConfig.loading = (async () => {
+        try {
+            var response = await fetch(API_BASE_URL + '/system-config?t=' + now);
+            var data = await response.json();
+
+            if (data.code === 200 && data.data) {
+                var config = data.data;
+                localStorage.setItem('systemConfig', JSON.stringify(config));
+                localStorage.setItem('systemConfigTime', now.toString());
+                applySystemConfig(config);
+            }
+        } catch (error) {
+            console.error('加载系统配置失败:', error);
+            if (cachedConfig) {
+                try {
+                    var config = JSON.parse(cachedConfig);
+                    applySystemConfig(config);
+                } catch (e) {}
+            }
+        } finally {
+            loadSystemConfig.loading = null;
+        }
+    })();
+
+    return loadSystemConfig.loading;
 }
 
 function applySystemConfig(config) {

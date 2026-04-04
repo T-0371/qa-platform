@@ -742,6 +742,7 @@
     <script>
         // 添加一个本地消息跟踪映射，用于通过ID更新消息状态
         let pendingMessages = new Map();
+        let messageConfirmTimeout = 5000;
         let isConnected = false;
         let stompClient = null;
         let selectedUserId = null;
@@ -1597,7 +1598,20 @@
                 content: content,
                 createdAt: message.createdAt
             });
-            
+
+            // 添加超时处理：如果5秒内没有收到服务器确认，则更新状态为"已发送"
+            setTimeout(() => {
+                const pending = pendingMessages.get(tempId);
+                if (pending) {
+                    const statusElement = pending.element.querySelector('.message-status');
+                    if (statusElement && statusElement.textContent === '发送中...') {
+                        statusElement.textContent = '已发送';
+                        console.log('消息发送超时，更新状态为已发送, tempId:', tempId);
+                    }
+                    pendingMessages.delete(tempId);
+                }
+            }, messageConfirmTimeout);
+
             // 发送WebSocket消息
             try {
                 stompClient.send('/app/chat/send', {}, JSON.stringify(message));
