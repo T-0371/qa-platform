@@ -226,19 +226,24 @@ public class MessageController {
             }
 
             PointsConfig config = pointsConfigService.getCurrentConfig();
-            int cost = config.getFirstChatCost() != null ? config.getFirstChatCost() : 2;
+            int firstChatCost = config != null && config.getFirstChatCost() != null ? config.getFirstChatCost() : 5;
+            int repeatChatCost = config != null && config.getRepeatChatCost() != null ? config.getRepeatChatCost() : 3;
 
-            if (initiator.getPoints() < cost) {
+            boolean exists = messageService.checkContactExists(userId, receiverId);
+            int pointsNeeded = exists ? repeatChatCost : firstChatCost;
+
+            if (!userService.checkPoints(userId, pointsNeeded)) {
                 return ApiResponse.error("积分不足，无法发起聊天");
             }
 
-            initiator.setPoints(initiator.getPoints() - cost);
-            userService.updateUser(initiator);
-
+            boolean success = userService.deductPoints(userId, pointsNeeded);
             Map<String, Object> result = new HashMap<>();
-            result.put("pointsDeducted", cost);
-            result.put("remainingPoints", initiator.getPoints());
-            return ApiResponse.success("发起聊天成功", result);
+            result.put("success", success);
+            result.put("points", userService.getUserById(userId).getPoints());
+            result.put("pointsDeducted", pointsNeeded);
+            ApiResponse<Map<String, Object>> response = ApiResponse.success(result);
+            response.setMessage("发起聊天成功，消耗" + pointsNeeded + "积分");
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("发起聊天失败: " + e.getMessage());
@@ -255,19 +260,20 @@ public class MessageController {
             }
 
             PointsConfig config = pointsConfigService.getCurrentConfig();
-            int cost = config.getRepeatChatCost() != null ? config.getRepeatChatCost() : 1;
+            int messageCost = config != null && config.getMessageCost() != null ? config.getMessageCost() : 1;
 
-            if (sender.getPoints() < cost) {
+            if (!userService.checkPoints(senderId, messageCost)) {
                 return ApiResponse.error("积分不足，无法发送消息");
             }
 
-            sender.setPoints(sender.getPoints() - cost);
-            userService.updateUser(sender);
-
+            boolean success = userService.deductPoints(senderId, messageCost);
             Map<String, Object> result = new HashMap<>();
-            result.put("pointsDeducted", cost);
-            result.put("remainingPoints", sender.getPoints());
-            return ApiResponse.success("消息发送成功", result);
+            result.put("success", success);
+            result.put("points", userService.getUserById(senderId).getPoints());
+            result.put("pointsDeducted", messageCost);
+            ApiResponse<Map<String, Object>> response = ApiResponse.success(result);
+            response.setMessage("消息发送成功，消耗" + messageCost + "积分");
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("发送消息失败: " + e.getMessage());
@@ -276,26 +282,87 @@ public class MessageController {
 
     @PostMapping("/reply-reward")
     @Transactional
-    public ApiResponse replyReward(@RequestParam Long senderId, @RequestParam Long receiverId, @RequestParam Long currentUserId) {
+    public ApiResponse replyReward(@RequestParam Long senderId, @RequestParam Long receiverId, @RequestParam(required = false) Long currentUserId) {
         try {
-            User user = userService.getUserById(currentUserId);
+            Long id = currentUserId != null ? currentUserId : senderId;
+            User user = userService.getUserById(id);
             if (user == null) {
                 return ApiResponse.error("用户不存在");
             }
 
             PointsConfig config = pointsConfigService.getCurrentConfig();
-            int reward = config.getReplyReward() != null ? config.getReplyReward() : 1;
+            int replyReward = config != null && config.getReplyReward() != null ? config.getReplyReward() : 1;
 
-            user.setPoints(user.getPoints() + reward);
-            userService.updateUser(user);
+            userService.addPoints(id, replyReward);
 
             Map<String, Object> result = new HashMap<>();
-            result.put("pointsAdded", reward);
-            result.put("remainingPoints", user.getPoints());
-            return ApiResponse.success("回复奖励成功", result);
+            result.put("success", true);
+            result.put("points", userService.getUserById(id).getPoints());
+            result.put("pointsAdded", replyReward);
+            ApiResponse<Map<String, Object>> response = ApiResponse.success(result);
+            response.setMessage("回复消息成功，获得" + replyReward + "积分");
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("回复奖励失败: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/receive-contact/{userId}")
+    @Transactional
+    public ApiResponse receiveContact(@PathVariable Long userId, @RequestParam(required = false) Long currentUserId) {
+        try {
+            Long id = currentUserId != null ? currentUserId : userId;
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return ApiResponse.error("用户不存在");
+            }
+
+            PointsConfig config = pointsConfigService.getCurrentConfig();
+            int firstContactReward = config != null && config.getFirstContactReward() != null ? config.getFirstContactReward() : 10;
+            int repeatContactReward = config != null && config.getRepeatContactReward() != null ? config.getRepeatContactReward() : 5;
+
+            boolean exists = messageService.checkContactExists(id, userId);
+            int pointsToAdd = exists ? repeatContactReward : firstContactReward;
+
+            userService.addPoints(id, pointsToAdd);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("points", userService.getUserById(id).getPoints());
+            result.put("pointsAdded", pointsToAdd);
+            ApiResponse<Map<String, Object>> response = ApiResponse.success(result);
+            response.setMessage("成功接收联系，获得" + pointsToAdd + "积分");
+            return response;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("接收联系失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/check-contact/{userId}")
+    public ApiResponse checkContact(@PathVariable Long userId, @RequestParam(required = false) Long currentUserId) {
+        try {
+            Long id = currentUserId != null ? currentUserId : userId;
+            boolean exists = messageService.checkContactExists(id, userId);
+
+            Long initiatorId = null;
+            if (exists) {
+                List<Message> messages = messageService.getConversation(id, userId);
+                if (messages != null && !messages.isEmpty()) {
+                    initiatorId = messages.get(0).getSenderId();
+                }
+            }
+
+            User user = userService.getUserById(id);
+            Map<String, Object> result = new HashMap<>();
+            result.put("exists", exists);
+            result.put("points", user != null ? user.getPoints() : 0);
+            result.put("initiatorId", initiatorId);
+            return ApiResponse.success(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("检查联系失败: " + e.getMessage());
         }
     }
 }
