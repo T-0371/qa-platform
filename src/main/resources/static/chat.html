@@ -943,22 +943,21 @@
                     // 发送在线状态
                     sendUserStatus('ONLINE', selectedUserId);
                     
+                    // 只订阅用户特定的消息队列，避免消息重复接收
                     stompClient.subscribe('/user/queue/messages', function(message) {
                         const chatMessage = JSON.parse(message.body);
                         console.log('收到私有消息:', chatMessage);
                         handleIncomingMessage(chatMessage);
                     });
                     
+                    // 订阅广播消息，用于系统通知等
                     stompClient.subscribe('/topic/messages', function(message) {
                         const chatMessage = JSON.parse(message.body);
                         console.log('收到广播消息:', chatMessage);
-                        handleIncomingMessage(chatMessage);
-                    });
-
-                    stompClient.subscribe('/topic/messages/user/' + currentUser.id, function(message) {
-                        const chatMessage = JSON.parse(message.body);
-                        console.log('收到用户特定消息:', chatMessage);
-                        handleIncomingMessage(chatMessage);
+                        // 只处理系统通知，不处理聊天消息
+                        if (chatMessage.type === 'CONFIG_UPDATE') {
+                            handleIncomingMessage(chatMessage);
+                        }
                     });
                     
                     // 订阅用户状态消息
@@ -1112,7 +1111,7 @@
             }
         }
         
-        function loadUsers() {
+        async function loadUsers() {
             console.log('开始加载用户列表...');
             const currentUserId = currentUser ? currentUser.id : null;
             
@@ -1121,15 +1120,18 @@
                 return;
             }
             
-            fetch(`/messages/recent?userId=${currentUserId}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('最近聊天数据:', data);
-                    let chatUserIds = new Set();
-                    let chatUserMap = new Map();
-                    
-                    if (data.code === 200) {
-                        const recentMessages = data.data;
+            try {
+                // 加载最近聊天记录
+                const recentResponse = await fetch(`/messages/recent?userId=${currentUserId}`);
+                const recentData = await recentResponse.json();
+                console.log('最近聊天数据:', recentData);
+                
+                let chatUserIds = new Set();
+                let chatUserMap = new Map();
+                
+                if (recentData.code === 200) {
+                    const recentMessages = recentData.data;
+                    if (Array.isArray(recentMessages)) {
                         recentMessages.forEach(msg => {
                             const otherUserId = msg.senderId === currentUserId ? msg.receiverId : msg.senderId;
                             if (otherUserId && otherUserId !== currentUserId) {
@@ -1147,96 +1149,104 @@
                         });
                         console.log('聊天过的用户:', chatUserMap);
                     }
+                }
+                
+                // 加载所有用户
+                const usersResponse = await fetch('/users');
+                const usersData = await usersResponse.json();
+                
+                if (usersData && usersData.code === 200) {
+                    allUsers = [];
                     
-                    return fetch('/users').then(response => response.json()).then(usersData => {
-                        return {
-                            usersData: usersData,
-                            chatUserMap: chatUserMap,
-                            chatUserIds: chatUserIds
-                        };
-                    });
-                })
-                .then(result => {
-                    const data = result.usersData;
-                    const chatUserMap = result.chatUserMap;
-                    const chatUserIds = result.chatUserIds;
-                    
-                    if (data && data.code === 200) {
-                        allUsers = [];
-                        
-                        if (chatUserIds.size > 0) {
-                            chatUserIds.forEach(userId => {
-                                const chatUser = chatUserMap.get(userId);
-                                const fullUser = data.data.find(u => u.id === userId);
-                                if (fullUser) {
-                                    allUsers.push({
-                                        id: fullUser.id,
-                                        username: fullUser.username,
-                                        avatar: fullUser.avatar,
-                                        lastMessage: chatUser ? chatUser.lastMessage : '',
-                                        lastMessageTime: chatUser ? chatUser.lastMessageTime : null
-                                    });
-                                }
-                            });
-                        }
-                        
-                        console.log('过滤后的用户列表:', allUsers);
-                        renderUserList(allUsers);
-                        
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const targetUserId = urlParams.get('userId');
-                        console.log('目标用户ID:', targetUserId);
-                        
-                        if (targetUserId) {
-                            const targetUserIdNum = parseInt(targetUserId);
-                            const targetUser = data.data.find(u => u.id === targetUserIdNum);
-                            if (targetUser) {
-                                let existsInList = allUsers.find(u => u.id === targetUserIdNum);
-                                if (!existsInList) {
-                                    allUsers.unshift({
-                                        id: targetUser.id,
-                                        username: targetUser.username,
-                                        avatar: targetUser.avatar,
-                                        lastMessage: '',
-                                        lastMessageTime: null
-                                    });
-                                    renderUserList(allUsers);
-                                }
-                                console.log('准备选择用户:', targetUserId);
-                                selectUser(targetUserIdNum);
+                    // 优先添加聊天过的用户
+                    if (chatUserIds.size > 0) {
+                        chatUserIds.forEach(userId => {
+                            const chatUser = chatUserMap.get(userId);
+                            const fullUser = usersData.data.find(u => u.id === userId);
+                            if (fullUser) {
+                                allUsers.push({
+                                    id: fullUser.id,
+                                    username: fullUser.username,
+                                    avatar: fullUser.avatar,
+                                    lastMessage: chatUser ? chatUser.lastMessage : '',
+                                    lastMessageTime: chatUser ? chatUser.lastMessageTime : null
+                                });
+                            } else if (chatUser) {
+                                // 如果在所有用户列表中找不到，但在聊天记录中有，也添加进来
+                                allUsers.push(chatUser);
                             }
+                        });
+                    }
+                    
+                    console.log('过滤后的用户列表:', allUsers);
+                    renderUserList(allUsers);
+                    
+                    // 加载未读消息数量
+                    await loadRecentConversations();
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const targetUserId = urlParams.get('userId');
+                    console.log('目标用户ID:', targetUserId);
+                    
+                    if (targetUserId) {
+                        const targetUserIdNum = parseInt(targetUserId);
+                        const targetUser = usersData.data.find(u => u.id === targetUserIdNum);
+                        if (targetUser) {
+                            let existsInList = allUsers.find(u => u.id === targetUserIdNum);
+                            if (!existsInList) {
+                                allUsers.unshift({
+                                    id: targetUser.id,
+                                    username: targetUser.username,
+                                    avatar: targetUser.avatar,
+                                    lastMessage: '',
+                                    lastMessageTime: null
+                                });
+                                renderUserList(allUsers);
+                                // 重新加载未读消息数量
+                                await loadRecentConversations();
+                            }
+                            console.log('准备选择用户:', targetUserId);
+                            selectUser(targetUserIdNum);
                         }
                     }
-                })
-                .catch(error => {
-                    console.error('加载用户列表失败:', error);
-                });
+                }
+            } catch (error) {
+                console.error('加载用户列表失败:', error);
+            }
         }
         
-        function loadRecentConversations() {
-            fetch(`/messages/recent?userId=${currentUser.id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.code === 200) {
-                        updateUnreadCounts(data.data);
-                    }
-                });
+        async function loadRecentConversations() {
+            try {
+                const response = await fetch(`/messages/recent?userId=${currentUser.id}`);
+                const data = await response.json();
+                console.log('最近聊天数据:', data);
+                if (data.code === 200) {
+                    updateUnreadCounts(data.data);
+                }
+            } catch (error) {
+                console.error('加载最近聊天记录失败:', error);
+            }
         }
         
         function updateUnreadCounts(messages) {
             const unreadCounts = {};
-            messages.forEach(msg => {
-                if (msg.receiverId === currentUser.id && !msg.isRead) {
-                    unreadCounts[msg.senderId] = (unreadCounts[msg.senderId] || 0) + 1;
-                }
-            });
             
+            // 确保 messages 是数组
+            if (Array.isArray(messages)) {
+                messages.forEach(msg => {
+                    if (msg.receiverId === currentUser.id && !msg.isRead) {
+                        unreadCounts[msg.senderId] = (unreadCounts[msg.senderId] || 0) + 1;
+                    }
+                });
+            }
+            
+            // 遍历所有用户项，更新未读消息数量
             document.querySelectorAll('.user-item').forEach(item => {
                 const userId = parseInt(item.dataset.userId);
                 const badge = item.querySelector('.unread-badge');
                 if (badge) {
-                    if (unreadCounts[userId]) {
-                        badge.textContent = unreadCounts[userId];
+                    if (unreadCounts[userId] && unreadCounts[userId] > 0) {
+                        badge.textContent = unreadCounts[userId] > 99 ? '99+' : unreadCounts[userId];
                         badge.classList.remove('hidden');
                     } else {
                         badge.classList.add('hidden');
@@ -1402,6 +1412,7 @@
                                 console.log('pointsAdded:', rewardData.data ? rewardData.data.pointsAdded : '无');
                                 showMessage(messageText + (rewardData.data && rewardData.data.pointsAdded ? ` +${rewardData.data.pointsAdded}` : ''), 'success');
                                 await loadUserPoints();
+                                // 当前用户是被联系者，发起者是对方
                                 currentInitiatorId = parseInt(userId);
                                 // 保存对话状态
                                 conversationStatus.set(userId, { role: 'receiver', lastActive: new Date() });
@@ -1413,12 +1424,21 @@
                             // 继续聊天，不重复积分
                             console.log('继续聊天，不重复积分');
                             showMessage(messageText, 'info');
-                            currentInitiatorId = parseInt(userId);
+                            // 保持之前的发起者ID不变
                             // 更新对话状态时间
                             if (existingStatus) {
                                 existingStatus.lastActive = new Date();
                             } else {
-                                conversationStatus.set(userId, { role: 'receiver', lastActive: new Date() });
+                                // 如果没有现有状态，根据是否有未读消息判断角色
+                                if (hasUnreadMessages) {
+                                    // 有未读消息，当前用户是被联系者
+                                    currentInitiatorId = parseInt(userId);
+                                    conversationStatus.set(userId, { role: 'receiver', lastActive: new Date() });
+                                } else {
+                                    // 无未读消息，当前用户是发起者
+                                    currentInitiatorId = currentUser.id;
+                                    conversationStatus.set(userId, { role: 'initiator', lastActive: new Date() });
+                                }
                             }
                         } else if (pointsAction === 'deduct') {
                             // 消耗积分
@@ -1433,6 +1453,7 @@
                                 console.log('pointsDeducted:', deductData.data ? deductData.data.pointsDeducted : '无');
                                 showMessage(messageText + (deductData.data && deductData.data.pointsDeducted ? ` -${deductData.data.pointsDeducted}` : ''), 'success');
                                 await loadUserPoints();
+                                // 当前用户是发起者
                                 currentInitiatorId = currentUser.id;
                                 // 保存对话状态
                                 conversationStatus.set(userId, { role: 'initiator', lastActive: new Date() });

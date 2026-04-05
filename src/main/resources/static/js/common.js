@@ -436,18 +436,44 @@ async function updateNotificationBadge() {
     try {
         var userData = JSON.parse(user);
         var userId = userData.id;
-        var response = await fetch(API_BASE_URL + '/notifications/count?userId=' + userId);
-        var data = await response.json();
         
-        if (data.code === 200) {
-            var count = data.data.count;
-            var badge = document.getElementById('notificationBadge');
-            if (badge) {
-                if (count > 0) {
-                    badge.textContent = count > 99 ? '99+' : count;
-                    badge.style.display = 'flex';
+        let retries = 3;
+        let delay = 1000;
+        let success = false;
+        
+        while (retries > 0 && !success) {
+            try {
+                var response = await fetch(API_BASE_URL + '/notifications/count?userId=' + userId);
+                
+                if (!response.ok) {
+                    throw new Error('网络响应失败: ' + response.status);
+                }
+                
+                var data = await response.json();
+                
+                if (data.code === 200) {
+                    var count = data.data.count;
+                    var badge = document.getElementById('notificationBadge');
+                    if (badge) {
+                        if (count > 0) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                            badge.style.display = 'flex';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                    success = true;
                 } else {
-                    badge.style.display = 'none';
+                    throw new Error('获取通知数量失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('获取通知数量失败:', error);
+                retries--;
+                
+                if (retries > 0) {
+                    console.log('重试获取通知数量...', retries, '次');
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
                 }
             }
         }
@@ -498,29 +524,58 @@ async function loadNotifications() {
     var user = localStorage.getItem('user');
     if (!user) return;
     
-    var userData = JSON.parse(user);
-    var userId = userData.id;
-    
-    var listContainer = document.getElementById('notificationList');
-    if (!listContainer) return;
-    
-    listContainer.innerHTML = '<div class="notification-loading">加载中...</div>';
-    
     try {
-        var response = await fetch(API_BASE_URL + '/notifications/unread?userId=' + userId);
-        var data = await response.json();
+        var userData = JSON.parse(user);
+        var userId = userData.id;
         
-        if (data.code === 200) {
-            var notifications = data.data;
-            renderNotifications(notifications);
-        } else if (data.code === 401) {
-            listContainer.innerHTML = '<div class="notification-empty">暂无通知</div>';
-        } else {
-            listContainer.innerHTML = '<div class="notification-empty">加载失败</div>';
+        var listContainer = document.getElementById('notificationList');
+        if (!listContainer) return;
+        
+        listContainer.innerHTML = '<div class="notification-loading">加载中...</div>';
+        
+        let retries = 3;
+        let delay = 1000;
+        let success = false;
+        
+        while (retries > 0 && !success) {
+            try {
+                var response = await fetch(API_BASE_URL + '/notifications/unread?userId=' + userId);
+                
+                if (!response.ok) {
+                    throw new Error('网络响应失败: ' + response.status);
+                }
+                
+                var data = await response.json();
+                
+                if (data.code === 200) {
+                    var notifications = data.data;
+                    renderNotifications(notifications);
+                    success = true;
+                } else if (data.code === 401) {
+                    listContainer.innerHTML = '<div class="notification-empty">暂无通知</div>';
+                    success = true;
+                } else {
+                    throw new Error('加载失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('加载通知失败:', error);
+                retries--;
+                
+                if (retries > 0) {
+                    console.log('重试加载通知...', retries, '次');
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                } else {
+                    listContainer.innerHTML = '<div class="notification-empty">加载失败</div>';
+                }
+            }
         }
     } catch (error) {
         console.error('加载通知失败:', error);
-        listContainer.innerHTML = '<div class="notification-empty">加载失败</div>';
+        var listContainer = document.getElementById('notificationList');
+        if (listContainer) {
+            listContainer.innerHTML = '<div class="notification-empty">加载失败</div>';
+        }
     }
 }
 
@@ -626,27 +681,50 @@ function handleChatNotificationClick(fromUserId, fromUsername, notificationId) {
 
 async function handleNotificationClick(notificationId, questionId, type) {
     console.log('处理通知点击:', notificationId, questionId, type);
+    
+    // 先标记为已读
     await markNotificationAsRead(notificationId);
+    
+    // 隐藏通知项
     var item = document.getElementById('notification-' + notificationId);
     if (item) {
         item.style.display = 'none';
     }
+    
+    // 更新通知徽章
     updateNotificationBadge();
     
+    // 跳转到问题详情页
     if (questionId) {
         window.location.href = '/question-detail.html?id=' + questionId;
     }
 }
 
 async function markNotificationAsRead(notificationId) {
-    try {
-        await fetch(API_BASE_URL + '/notifications/' + notificationId + '/read', {
-            method: 'POST'
-        });
-    } catch (error) {
-        console.error('标记通知已读失败:', error);
+    let retries = 3;
+    let delay = 1000;
+    
+    while (retries > 0) {
+        try {
+            await fetch(API_BASE_URL + '/notifications/' + notificationId + '/read', {
+                method: 'POST'
+            });
+            return true;
+        } catch (error) {
+            console.error('标记通知已读失败:', error);
+            retries--;
+            
+            if (retries > 0) {
+                console.log('重试标记通知已读...', retries, '次');
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            }
+        }
     }
+    return false;
 }
+
+
 
 async function markAllNotificationsRead() {
     var user = localStorage.getItem('user');
@@ -655,11 +733,48 @@ async function markAllNotificationsRead() {
     try {
         var userData = JSON.parse(user);
         var userId = userData.id;
-        await fetch(API_BASE_URL + '/notifications/read-all?userId=' + userId, {
-            method: 'POST'
-        });
-        loadNotifications();
-        updateNotificationBadge();
+        
+        let retries = 3;
+        let delay = 1000;
+        let success = false;
+        
+        while (retries > 0 && !success) {
+            try {
+                var response = await fetch(API_BASE_URL + '/notifications/read-all?userId=' + userId, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('网络响应失败: ' + response.status);
+                }
+                
+                var data = await response.json();
+                
+                if (data.code === 200) {
+                    // 重新加载通知，此时应该显示为空
+                    await loadNotifications();
+                    // 更新通知徽章
+                    await updateNotificationBadge();
+                    // 隐藏所有通知项
+                    var notificationItems = document.querySelectorAll('.notification-item');
+                    notificationItems.forEach(function(item) {
+                        item.style.display = 'none';
+                    });
+                    success = true;
+                } else {
+                    throw new Error('全部标记已读失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('全部标记已读失败:', error);
+                retries--;
+                
+                if (retries > 0) {
+                    console.log('重试全部标记已读...', retries, '次');
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
     } catch (error) {
         console.error('全部标记已读失败:', error);
     }
@@ -713,22 +828,14 @@ async function loadSystemConfig() {
     var cacheTime = localStorage.getItem('systemConfigTime');
     var now = Date.now();
 
-    if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 500) {
-        try {
-            var config = JSON.parse(cachedConfig);
-            applySystemConfig(config);
-            return;
-        } catch (e) {
-            console.error('解析缓存配置失败:', e);
-        }
-    }
-
-    if (cachedConfig) {
+    // 延长缓存时间到 10 分钟，确保系统重启后仍能使用缓存配置
+    if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 600000) {
         try {
             var config = JSON.parse(cachedConfig);
             applySystemConfig(config);
         } catch (e) {
             console.error('解析缓存配置失败:', e);
+            // 缓存解析失败，继续尝试从服务器加载
         }
     }
 
@@ -737,20 +844,51 @@ async function loadSystemConfig() {
     }
 
     loadSystemConfig.loading = (async () => {
-        try {
-            var response = await fetch(API_BASE_URL + '/system-config?t=' + now);
-            var data = await response.json();
+        let retries = 3;
+        let delay = 1000;
 
-            if (data.code === 200 && data.data) {
-                var config = data.data;
-                localStorage.setItem('systemConfig', JSON.stringify(config));
-                localStorage.setItem('systemConfigTime', now.toString());
-                applySystemConfig(config);
+        while (retries > 0) {
+            try {
+                var response = await fetch(API_BASE_URL + '/system-config?t=' + now);
+                
+                if (!response.ok) {
+                    throw new Error('网络响应失败: ' + response.status);
+                }
+                
+                var data = await response.json();
+
+                if (data.code === 200 && data.data) {
+                    var config = data.data;
+                    localStorage.setItem('systemConfig', JSON.stringify(config));
+                    localStorage.setItem('systemConfigTime', now.toString());
+                    applySystemConfig(config);
+                    break;
+                } else {
+                    throw new Error('配置加载失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('加载系统配置失败:', error);
+                retries--;
+                
+                if (retries > 0) {
+                    console.log('重试加载系统配置...', retries, '次');
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2; // 指数退避
+                } else {
+                    console.error('系统配置加载失败，使用默认配置');
+                    // 使用默认配置
+                    var defaultConfig = {
+                        siteName: 'IT技术问答社区',
+                        siteDescription: '探索技术前沿，分享编程智慧，共同成长进步',
+                        backgroundType: 'gradient',
+                        backgroundValue: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        layoutType: 'default',
+                        primaryColor: '#ec4899',
+                        secondaryColor: '#8b5cf6'
+                    };
+                    applySystemConfig(defaultConfig);
+                }
             }
-        } catch (error) {
-            console.error('加载系统配置失败:', error);
-        } finally {
-            loadSystemConfig.loading = null;
         }
     })();
 
