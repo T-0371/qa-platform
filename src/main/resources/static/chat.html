@@ -327,6 +327,17 @@
             font-size: 16px;
         }
         
+        /* 状态变化动画 */
+        .status-animation {
+            animation: statusPulse 1s ease-in-out;
+        }
+        
+        @keyframes statusPulse {
+            0% { opacity: 0.5; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
         .hidden {
             display: none !important;
         }
@@ -1093,6 +1104,9 @@
                     if (status === 'ONLINE') {
                         statusElement.className = 'user-status online';
                         statusElement.textContent = '在线';
+                        // 添加在线状态动画
+                        statusElement.classList.add('status-animation');
+                        setTimeout(() => statusElement.classList.remove('status-animation'), 1000);
                     } else if (status === 'AWAY') {
                         statusElement.className = 'user-status away';
                         statusElement.textContent = '离开';
@@ -1108,7 +1122,15 @@
                 const chatStatusEl = document.getElementById('chatStatus');
                 if (chatStatusEl) {
                     const status = userOnlineStatus.get(selectedUserId);
-                    chatStatusEl.textContent = status === 'ONLINE' ? '在线' : (status === 'AWAY' ? '离开' : '离线');
+                    const newStatusText = status === 'ONLINE' ? '在线' : (status === 'AWAY' ? '离开' : '离线');
+                    
+                    // 只有当状态变化时才更新，避免不必要的DOM操作
+                    if (chatStatusEl.textContent !== newStatusText) {
+                        chatStatusEl.textContent = newStatusText;
+                        // 添加状态变化动画
+                        chatStatusEl.classList.add('status-animation');
+                        setTimeout(() => chatStatusEl.classList.remove('status-animation'), 1000);
+                    }
                 }
             }
         }
@@ -1119,18 +1141,23 @@
             // 为每个用户获取在线状态
             allUsers.forEach(user => {
                 if (user && user.id) {
-                    fetch(`/api/user/status?userId=${user.id}`)
+                    fetch(`/api/user/status?userId=${user.id}`, {
+                        timeout: 3000
+                    })
                         .then(response => response.json())
                         .then(data => {
                             console.log('用户状态API响应:', user.id, data);
                             // 无论用户在线还是离线，都更新状态
                             if (data) {
-                                userOnlineStatus.set(user.id, data.online || 'OFFLINE');
+                                const status = data.online ? 'ONLINE' : 'OFFLINE';
+                                userOnlineStatus.set(user.id, status);
                                 if (data.chatWithUserId) {
                                     userChatStatus.set(user.id, data.chatWithUserId);
                                 } else {
                                     userChatStatus.delete(user.id);
                                 }
+                                // 立即更新UI
+                                updateUserStatusUI();
                             }
                         })
                         .catch(error => {
@@ -1147,11 +1174,11 @@
             if (statusPollingInterval) {
                 clearInterval(statusPollingInterval);
             }
-            // 每10秒轮询一次用户状态
+            // 每3秒轮询一次用户状态，提高实时性
             statusPollingInterval = setInterval(() => {
                 console.log('定期轮询用户状态...');
                 loadUserOnlineStatus();
-            }, 10000);
+            }, 3000);
         }
         
         // 停止定期轮询用户状态

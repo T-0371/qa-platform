@@ -389,12 +389,18 @@ function getCurrentTheme() {
     return THEMES.find(t => t.name === themeName) || THEMES[0];
 }
 
+// 立即执行关键初始化操作
+updateNav();
+loadSystemConfig();
+
+// DOM 加载完成后执行其他操作
 document.addEventListener('DOMContentLoaded', function() {
-    updateNav();
-    loadSystemConfig();
-    updateNotificationBadge();
-    setInterval(updateNotificationBadge, 10000);
-    setInterval(checkLoginStatus, 10000);
+    // 延迟执行非关键操作，提高页面加载速度
+    setTimeout(() => {
+        updateNotificationBadge();
+        setInterval(updateNotificationBadge, 10000);
+        setInterval(checkLoginStatus, 10000);
+    }, 100);
 });
 
 function checkLoginStatus() {
@@ -823,13 +829,27 @@ function getTimeAgo(dateString) {
     return date.toLocaleDateString('zh-CN');
 }
 
+// 立即应用默认配置，避免显示白色背景
+(function() {
+    var defaultConfig = {
+        siteName: 'IT技术问答社区',
+        siteDescription: '探索技术前沿，分享编程智慧，共同成长进步',
+        backgroundType: 'gradient',
+        backgroundValue: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        layoutType: 'default',
+        primaryColor: '#ec4899',
+        secondaryColor: '#8b5cf6'
+    };
+    applySystemConfig(defaultConfig);
+})();
+
 async function loadSystemConfig() {
     var cachedConfig = localStorage.getItem('systemConfig');
     var cacheTime = localStorage.getItem('systemConfigTime');
     var now = Date.now();
 
-    // 延长缓存时间到 10 分钟，确保系统重启后仍能使用缓存配置
-    if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 600000) {
+    // 立即应用缓存配置（如果存在）
+    if (cachedConfig && cacheTime) {
         try {
             var config = JSON.parse(cachedConfig);
             applySystemConfig(config);
@@ -844,12 +864,14 @@ async function loadSystemConfig() {
     }
 
     loadSystemConfig.loading = (async () => {
-        let retries = 3;
-        let delay = 1000;
+        let retries = 5;
+        let delay = 500;
 
         while (retries > 0) {
             try {
-                var response = await fetch(API_BASE_URL + '/system-config?t=' + now);
+                var response = await fetch(API_BASE_URL + '/system-config?t=' + now, {
+                    timeout: 5000
+                });
                 
                 if (!response.ok) {
                     throw new Error('网络响应失败: ' + response.status);
@@ -873,20 +895,7 @@ async function loadSystemConfig() {
                 if (retries > 0) {
                     console.log('重试加载系统配置...', retries, '次');
                     await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2; // 指数退避
-                } else {
-                    console.error('系统配置加载失败，使用默认配置');
-                    // 使用默认配置
-                    var defaultConfig = {
-                        siteName: 'IT技术问答社区',
-                        siteDescription: '探索技术前沿，分享编程智慧，共同成长进步',
-                        backgroundType: 'gradient',
-                        backgroundValue: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        layoutType: 'default',
-                        primaryColor: '#ec4899',
-                        secondaryColor: '#8b5cf6'
-                    };
-                    applySystemConfig(defaultConfig);
+                    delay *= 1.5; // 指数退避
                 }
             }
         }
