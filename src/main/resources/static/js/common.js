@@ -713,7 +713,7 @@ async function loadSystemConfig() {
     var cacheTime = localStorage.getItem('systemConfigTime');
     var now = Date.now();
 
-    if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 1000) {
+    if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 500) {
         try {
             var config = JSON.parse(cachedConfig);
             applySystemConfig(config);
