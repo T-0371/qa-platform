@@ -3,7 +3,7 @@
 <mapper namespace="com.example.qa.mapper.MessageMapper">
     <select id="getConversation" resultType="com.example.qa.entity.Message">
         SELECT id, sender_id AS senderId, sender_username AS senderUsername, sender_avatar AS senderAvatar,
-               receiver_id AS receiverId, receiver_username AS receiverUsername, receiver_avatar AS receiverAvatar,
+               receiver_id AS receiverId, receiver_username AS receiverUsername,
                content, is_read AS isRead, created_at AS createdAt, question_id AS questionId
         FROM message
         WHERE (sender_id = #{userId1} AND receiver_id = #{userId2})
@@ -13,7 +13,7 @@
     
     <select id="getRecentConversations" resultType="com.example.qa.entity.Message">
         SELECT id, sender_id AS senderId, sender_username AS senderUsername, sender_avatar AS senderAvatar,
-               receiver_id AS receiverId, receiver_username AS receiverUsername, receiver_avatar AS receiverAvatar,
+               receiver_id AS receiverId, receiver_username AS receiverUsername,
                content, is_read AS isRead, created_at AS createdAt, question_id AS questionId
         FROM message
         WHERE sender_id = #{userId} OR receiver_id = #{userId}
