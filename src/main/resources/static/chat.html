@@ -959,7 +959,7 @@
                 try {
                     console.log('当前用户:', currentUser);
                     const socket = new SockJS('/ws?userId=' + currentUser.id, null, {
-                        timeout: 10000, // 设置10秒超时
+                        timeout: 5000, // 缩短超时时间
                         transports: ['websocket', 'xhr-streaming', 'xhr-polling'] // 优先使用websocket
                     });
                     console.log('SockJS创建成功:', socket);
@@ -967,9 +967,15 @@
                     console.log('Stomp客户端创建成功:', stompClient);
                     
                     // 优化STOMP配置
-                    stompClient.heartbeat.outgoing = 20000; // 每20秒发送一次心跳
-                    stompClient.heartbeat.incoming = 30000; // 每30秒接收一次心跳
-                    stompClient.reconnect_delay = 3000; // 重连延迟3秒
+                    stompClient.heartbeat.outgoing = 10000; // 每10秒发送一次心跳
+                    stompClient.heartbeat.incoming = 15000; // 每15秒接收一次心跳
+                    stompClient.reconnect_delay = 2000; // 重连延迟2秒
+                    stompClient.debug = function(str) {
+                        // 只输出错误信息，减少控制台噪音
+                        if (str.indexOf('error') !== -1 || str.indexOf('Error') !== -1) {
+                            console.error('STOMP debug:', str);
+                        }
+                    };
                     
                     const headers = {'userId': currentUser.id.toString()};
                     console.log('WebSocket连接头:', headers);
@@ -979,7 +985,7 @@
                         console.error('WebSocket连接超时');
                         updateConnectionStatus(false);
                         reject(new Error('连接超时'));
-                    }, 10000);
+                    }, 8000);
                     
                     stompClient.connect(
                         headers,
@@ -999,27 +1005,46 @@
                             sendUserStatus('ONLINE', selectedUserId);
                             
                             // 只订阅用户特定的消息队列，避免消息重复接收
-                            stompClient.subscribe('/user/queue/messages', function(message) {
-                                const chatMessage = JSON.parse(message.body);
-                                console.log('收到私有消息:', chatMessage);
-                                handleIncomingMessage(chatMessage);
+                            const messageSubscription = stompClient.subscribe('/user/queue/messages', function(message) {
+                                try {
+                                    const chatMessage = JSON.parse(message.body);
+                                    console.log('收到私有消息:', chatMessage);
+                                    handleIncomingMessage(chatMessage);
+                                } catch (error) {
+                                    console.error('解析消息失败:', error);
+                                }
                             });
                             
                             // 订阅广播消息，用于系统通知等
-                            stompClient.subscribe('/topic/messages', function(message) {
-                                const chatMessage = JSON.parse(message.body);
-                                console.log('收到广播消息:', chatMessage);
-                                // 只处理系统通知，不处理聊天消息
-                                if (chatMessage.type === 'CONFIG_UPDATE') {
-                                    handleIncomingMessage(chatMessage);
+                            const broadcastSubscription = stompClient.subscribe('/topic/messages', function(message) {
+                                try {
+                                    const chatMessage = JSON.parse(message.body);
+                                    console.log('收到广播消息:', chatMessage);
+                                    // 只处理系统通知，不处理聊天消息
+                                    if (chatMessage.type === 'CONFIG_UPDATE') {
+                                        handleIncomingMessage(chatMessage);
+                                    }
+                                } catch (error) {
+                                    console.error('解析广播消息失败:', error);
                                 }
                             });
                             
                             // 订阅用户状态消息
-                            stompClient.subscribe('/topic/status', function(message) {
-                                const statusMessage = JSON.parse(message.body);
-                                handleUserStatusMessage(statusMessage);
+                            const statusSubscription = stompClient.subscribe('/topic/status', function(message) {
+                                try {
+                                    const statusMessage = JSON.parse(message.body);
+                                    handleUserStatusMessage(statusMessage);
+                                } catch (error) {
+                                    console.error('解析状态消息失败:', error);
+                                }
                             });
+                            
+                            // 保存订阅对象，以便在断开连接时取消订阅
+                            window.chatSubscriptions = {
+                                message: messageSubscription,
+                                broadcast: broadcastSubscription,
+                                status: statusSubscription
+                            };
                             
                             resolve();
                         }, function(error) {
@@ -1028,7 +1053,7 @@
                             isConnected = false;
                             updateConnectionStatus(false);
                             // 立即重试连接
-                            setTimeout(connectWebSocket, 3000);
+                            setTimeout(connectWebSocket, 2000);
                             reject(error);
                         });
                 } catch (error) {
@@ -1036,7 +1061,7 @@
                     isConnected = false;
                     updateConnectionStatus(false);
                     // 立即重试连接
-                    setTimeout(connectWebSocket, 3000);
+                    setTimeout(connectWebSocket, 2000);
                     reject(error);
                 }
             });

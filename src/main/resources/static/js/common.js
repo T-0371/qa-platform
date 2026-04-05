@@ -391,16 +391,18 @@ function getCurrentTheme() {
 
 // 立即执行关键初始化操作
 updateNav();
-loadSystemConfig();
 
 // DOM 加载完成后执行其他操作
 document.addEventListener('DOMContentLoaded', function() {
+    // 立即执行必要的操作
+    loadSystemConfig();
+    
     // 延迟执行非关键操作，提高页面加载速度
     setTimeout(() => {
         updateNotificationBadge();
-        setInterval(updateNotificationBadge, 10000);
-        setInterval(checkLoginStatus, 10000);
-    }, 100);
+        setInterval(updateNotificationBadge, 15000); // 延长间隔，减少网络请求
+        setInterval(checkLoginStatus, 30000); // 延长间隔，减少网络请求
+    }, 50);
 });
 
 function checkLoginStatus() {
@@ -443,13 +445,15 @@ async function updateNotificationBadge() {
         var userData = JSON.parse(user);
         var userId = userData.id;
         
-        let retries = 3;
-        let delay = 1000;
+        let retries = 5;
+        let delay = 500;
         let success = false;
         
         while (retries > 0 && !success) {
             try {
-                var response = await fetch(API_BASE_URL + '/notifications/count?userId=' + userId);
+                var response = await fetch(API_BASE_URL + '/notifications/count?userId=' + userId, {
+                    timeout: 3000
+                });
                 
                 if (!response.ok) {
                     throw new Error('网络响应失败: ' + response.status);
@@ -464,6 +468,21 @@ async function updateNotificationBadge() {
                         if (count > 0) {
                             badge.textContent = count > 99 ? '99+' : count;
                             badge.style.display = 'flex';
+                            // 确保徽章样式正确
+                            badge.style.position = 'absolute';
+                            badge.style.top = '-8px';
+                            badge.style.right = '-8px';
+                            badge.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                            badge.style.color = 'white';
+                            badge.style.border = '2px solid white';
+                            badge.style.borderRadius = '50%';
+                            badge.style.minWidth = '20px';
+                            badge.style.height = '20px';
+                            badge.style.justifyContent = 'center';
+                            badge.style.alignItems = 'center';
+                            badge.style.fontSize = '12px';
+                            badge.style.fontWeight = 'bold';
+                            badge.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.6)';
                         } else {
                             badge.style.display = 'none';
                         }
@@ -479,7 +498,7 @@ async function updateNotificationBadge() {
                 if (retries > 0) {
                     console.log('重试获取通知数量...', retries, '次');
                     await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
+                    delay *= 1.5;
                 }
             }
         }
@@ -539,13 +558,15 @@ async function loadNotifications() {
         
         listContainer.innerHTML = '<div class="notification-loading">加载中...</div>';
         
-        let retries = 3;
-        let delay = 1000;
+        let retries = 5;
+        let delay = 500;
         let success = false;
         
         while (retries > 0 && !success) {
             try {
-                var response = await fetch(API_BASE_URL + '/notifications/unread?userId=' + userId);
+                var response = await fetch(API_BASE_URL + '/notifications/unread?userId=' + userId, {
+                    timeout: 5000
+                });
                 
                 if (!response.ok) {
                     throw new Error('网络响应失败: ' + response.status);
@@ -570,9 +591,15 @@ async function loadNotifications() {
                 if (retries > 0) {
                     console.log('重试加载通知...', retries, '次');
                     await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
+                    delay *= 1.5;
                 } else {
-                    listContainer.innerHTML = '<div class="notification-empty">加载失败</div>';
+                    // 显示友好的错误信息，并提供重试按钮
+                    listContainer.innerHTML = `
+                        <div class="notification-empty">
+                            <p>加载通知失败</p>
+                            <button onclick="loadNotifications()" style="margin-top: 10px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">重试</button>
+                        </div>
+                    `;
                 }
             }
         }
@@ -580,7 +607,12 @@ async function loadNotifications() {
         console.error('加载通知失败:', error);
         var listContainer = document.getElementById('notificationList');
         if (listContainer) {
-            listContainer.innerHTML = '<div class="notification-empty">加载失败</div>';
+            listContainer.innerHTML = `
+                <div class="notification-empty">
+                    <p>加载通知失败</p>
+                    <button onclick="loadNotifications()" style="margin-top: 10px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">重试</button>
+                </div>
+            `;
         }
     }
 }
@@ -829,6 +861,9 @@ function getTimeAgo(dateString) {
     return date.toLocaleDateString('zh-CN');
 }
 
+// 全局系统配置对象
+var globalSystemConfig = null;
+
 // 立即应用默认配置，避免显示白色背景
 (function() {
     var defaultConfig = {
@@ -840,69 +875,79 @@ function getTimeAgo(dateString) {
         primaryColor: '#ec4899',
         secondaryColor: '#8b5cf6'
     };
+    globalSystemConfig = defaultConfig;
     applySystemConfig(defaultConfig);
 })();
 
-async function loadSystemConfig() {
-    var cachedConfig = localStorage.getItem('systemConfig');
-    var cacheTime = localStorage.getItem('systemConfigTime');
-    var now = Date.now();
-
-    // 立即应用缓存配置（如果存在）
-    if (cachedConfig && cacheTime) {
-        try {
+// 从localStorage加载配置
+function loadConfigFromStorage() {
+    try {
+        var cachedConfig = localStorage.getItem('systemConfig');
+        var cacheTime = localStorage.getItem('systemConfigTime');
+        if (cachedConfig && cacheTime) {
             var config = JSON.parse(cachedConfig);
+            globalSystemConfig = config;
             applySystemConfig(config);
-        } catch (e) {
-            console.error('解析缓存配置失败:', e);
-            // 缓存解析失败，继续尝试从服务器加载
+            return true;
         }
+    } catch (e) {
+        console.error('从本地存储加载配置失败:', e);
     }
+    return false;
+}
 
-    if (loadSystemConfig.loading) {
-        return loadSystemConfig.loading;
-    }
+// 从服务器加载配置
+async function loadConfigFromServer() {
+    let retries = 5;
+    let delay = 500;
+    const now = Date.now();
 
-    loadSystemConfig.loading = (async () => {
-        let retries = 5;
-        let delay = 500;
+    while (retries > 0) {
+        try {
+            var response = await fetch(API_BASE_URL + '/system-config?t=' + now, {
+                timeout: 3000
+            });
+            
+            if (!response.ok) {
+                throw new Error('网络响应失败: ' + response.status);
+            }
+            
+            var data = await response.json();
 
-        while (retries > 0) {
-            try {
-                var response = await fetch(API_BASE_URL + '/system-config?t=' + now, {
-                    timeout: 5000
-                });
-                
-                if (!response.ok) {
-                    throw new Error('网络响应失败: ' + response.status);
-                }
-                
-                var data = await response.json();
-
-                if (data.code === 200 && data.data) {
-                    var config = data.data;
-                    localStorage.setItem('systemConfig', JSON.stringify(config));
-                    localStorage.setItem('systemConfigTime', now.toString());
-                    applySystemConfig(config);
-                    break;
-                } else {
-                    throw new Error('配置加载失败: ' + (data.message || '未知错误'));
-                }
-            } catch (error) {
-                console.error('加载系统配置失败:', error);
-                retries--;
-                
-                if (retries > 0) {
-                    console.log('重试加载系统配置...', retries, '次');
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 1.5; // 指数退避
-                }
+            if (data.code === 200 && data.data) {
+                var config = data.data;
+                globalSystemConfig = config;
+                localStorage.setItem('systemConfig', JSON.stringify(config));
+                localStorage.setItem('systemConfigTime', now.toString());
+                applySystemConfig(config);
+                return true;
+            } else {
+                throw new Error('配置加载失败: ' + (data.message || '未知错误'));
+            }
+        } catch (error) {
+            console.error('从服务器加载系统配置失败:', error);
+            retries--;
+            
+            if (retries > 0) {
+                console.log('重试加载系统配置...', retries, '次');
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 1.5; // 指数退避
             }
         }
-    })();
-
-    return loadSystemConfig.loading;
+    }
+    return false;
 }
+
+async function loadSystemConfig() {
+    // 首先尝试从本地存储加载
+    const loadedFromStorage = loadConfigFromStorage();
+    
+    // 然后异步从服务器更新
+    await loadConfigFromServer();
+}
+
+// 立即加载配置
+loadSystemConfig();
 
 function applySystemConfig(config) {
     if (config.siteName) {
