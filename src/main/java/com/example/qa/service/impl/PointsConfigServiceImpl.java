@@ -5,6 +5,7 @@ import com.example.qa.entity.PointsConfig;
 import com.example.qa.mapper.PointsConfigMapper;
 import com.example.qa.service.PointsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -17,6 +18,9 @@ public class PointsConfigServiceImpl implements PointsConfigService {
     
     @Autowired
     private PointsConfigMapper pointsConfigMapper;
+    
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     
     @Override
     public PointsConfig getCurrentConfig() {
@@ -98,8 +102,24 @@ public class PointsConfigServiceImpl implements PointsConfigService {
      * 创建积分配置表
      */
     private void createPointsConfigTable() {
-        // 这里可以添加创建表的SQL语句
-        // 由于我们使用的是MyBatis Plus，这里只是一个占位符
-        // 实际项目中，应该使用数据库迁移工具来管理表结构
+        try {
+            // 使用JdbcTemplate创建积分配置表
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS `points_config` (" +
+                "`id` bigint NOT NULL AUTO_INCREMENT, " +
+                "`first_chat_cost` int DEFAULT '10', " +
+                "`repeat_chat_cost` int DEFAULT '5', " +
+                "`message_cost` int DEFAULT '1', " +
+                "`question_reward` int DEFAULT '10', " +
+                "`answer_reward` int DEFAULT '5', " +
+                "`first_contact_reward` int DEFAULT '10', " +
+                "`repeat_contact_reward` int DEFAULT '5', " +
+                "`reply_reward` int DEFAULT '1', " +
+                "`created_at` datetime DEFAULT CURRENT_TIMESTAMP, " +
+                "`updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, " +
+                "PRIMARY KEY (`id`) " +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        } catch (Exception e) {
+            // 忽略表已存在的错误
+        }
     }
 }
