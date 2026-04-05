@@ -2349,8 +2349,12 @@
                 if (data.code === 200) {
                     showMessage('系统配置保存成功', 'success');
 
-                    localStorage.removeItem('systemConfig');
-                    localStorage.removeItem('systemConfigTime');
+                    try {
+                        localStorage.removeItem('systemConfig');
+                        localStorage.removeItem('systemConfigTime');
+                    } catch (localStorageError) {
+                        console.error('localStorage操作失败:', localStorageError);
+                    }
 
                     try {
                         if (typeof stompClient !== 'undefined' && stompClient && stompClient.connected) {
