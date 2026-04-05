@@ -78,11 +78,17 @@
             border-radius: 6px;
             transition: all 0.2s;
             font-size: 14px;
+            z-index: 1001;
+            position: relative;
         }
         
         .header-nav a:hover {
             background: rgba(99, 102, 241, 0.1);
             color: var(--text-primary);
+        }
+        
+        .header-nav a:active {
+            transform: translateY(1px);
         }
         
         .header-right {
@@ -872,10 +878,11 @@
         </div>
         <div class="header-right">
             <div class="user-info">
+                <a class="user-dropdown-item" href="/home.html"><i class="fas fa-globe"></i> 返回网站</a>
                 <div class="user-avatar" id="userAvatar" onclick="toggleUserDropdown()">A</div>
                 <div class="user-dropdown" id="userDropdown">
                     <a class="user-dropdown-item" href="/profile.html"><i class="fas fa-user"></i> 个人中心</a>
-                    <a class="user-dropdown-item" href="/home.html"><i class="fas fa-globe"></i> 返回网站</a>
+                    <!-- <a class="user-dropdown-item" href="/home.html"><i class="fas fa-globe"></i> 返回网站</a> -->
                     <a class="user-dropdown-item logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
                 </div>
             </div>

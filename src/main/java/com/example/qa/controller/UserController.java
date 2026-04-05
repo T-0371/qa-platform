@@ -175,6 +175,17 @@ public class UserController {
             return ApiResponse.error("获取失败: " + e.getMessage());
         }
     }
+    
+    @GetMapping("/security-question")
+    public ApiResponse getSecurityQuestionByQuery(@RequestParam String username) {
+        try {
+            String question = userService.getSecurityQuestion(username);
+            return ApiResponse.success("获取成功", question);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("获取失败: " + e.getMessage());
+        }
+    }
 
     @GetMapping("/{id}")
     public ApiResponse getUserById(@PathVariable Long id) {

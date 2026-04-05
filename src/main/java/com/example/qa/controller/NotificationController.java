@@ -52,11 +52,15 @@ public class NotificationController {
     }
 
     @GetMapping("/unread/count")
-    public ApiResponse getUnreadCount(HttpSession session) {
+    public ApiResponse getUnreadCount(@RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             int count = notificationService.getUnreadCount(user.getId());
             return ApiResponse.success("获取成功", count);

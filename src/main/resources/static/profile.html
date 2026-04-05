@@ -1136,7 +1136,21 @@
             }
             
             .profile-stats {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stat-item {
+                padding: 10px 15px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            .stat-number {
+                font-size: 20px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             
             .card {

@@ -451,7 +451,7 @@ async function updateNotificationBadge() {
         
         while (retries > 0 && !success) {
             try {
-                var response = await fetch(API_BASE_URL + '/notifications/count?userId=' + userId, {
+                var response = await fetch(API_BASE_URL + '/notifications/unread/count?userId=' + userId, {
                     timeout: 3000
                 });
                 
@@ -898,14 +898,15 @@ function loadConfigFromStorage() {
 
 // 从服务器加载配置
 async function loadConfigFromServer() {
-    let retries = 5;
-    let delay = 500;
+    let retries = 3; // 减少重试次数
+    let delay = 300; // 减少延迟
     const now = Date.now();
 
     while (retries > 0) {
         try {
             var response = await fetch(API_BASE_URL + '/system-config?t=' + now, {
-                timeout: 3000
+                timeout: 2000, // 减少超时时间
+                cache: 'no-cache'
             });
             
             if (!response.ok) {
@@ -919,7 +920,10 @@ async function loadConfigFromServer() {
                 globalSystemConfig = config;
                 localStorage.setItem('systemConfig', JSON.stringify(config));
                 localStorage.setItem('systemConfigTime', now.toString());
-                applySystemConfig(config);
+                // 使用 requestAnimationFrame 优化 DOM 操作
+                requestAnimationFrame(() => {
+                    applySystemConfig(config);
+                });
                 return true;
             } else {
                 throw new Error('配置加载失败: ' + (data.message || '未知错误'));
@@ -939,11 +943,13 @@ async function loadConfigFromServer() {
 }
 
 async function loadSystemConfig() {
-    // 首先尝试从本地存储加载
+    // 首先尝试从本地存储加载（同步）
     const loadedFromStorage = loadConfigFromStorage();
     
-    // 然后异步从服务器更新
-    await loadConfigFromServer();
+    // 然后异步从服务器更新，不阻塞页面渲染
+    setTimeout(async () => {
+        await loadConfigFromServer();
+    }, 100); // 延迟一点时间，确保页面先渲染
 }
 
 // 立即加载配置
