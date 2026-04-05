@@ -30,11 +30,15 @@ public class MessageController {
     private PointsConfigService pointsConfigService;
 
     @GetMapping("/conversation")
-    public ApiResponse getMessagesBetweenUsers(@RequestParam Long otherUserId, HttpSession session) {
+    public ApiResponse getMessagesBetweenUsers(@RequestParam Long otherUserId, @RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             List<Message> messages = messageService.getConversation(user.getId(), otherUserId);
             return ApiResponse.success("获取成功", messages);
@@ -45,11 +49,15 @@ public class MessageController {
     }
 
     @GetMapping("/contacts")
-    public ApiResponse getUserContacts(HttpSession session) {
+    public ApiResponse getUserContacts(@RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             List<Message> contacts = messageService.getRecentConversations(user.getId());
             return ApiResponse.success("获取成功", contacts);
@@ -80,11 +88,15 @@ public class MessageController {
     }
 
     @GetMapping("/unread/count")
-    public ApiResponse getUnreadMessageCount(HttpSession session) {
+    public ApiResponse getUnreadMessageCount(@RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             Long count = messageService.getUnreadCount(user.getId());
             return ApiResponse.success("获取成功", count);
@@ -95,11 +107,15 @@ public class MessageController {
     }
 
     @PutMapping("/read")
-    public ApiResponse markMessagesAsRead(@RequestParam Long senderId, HttpSession session) {
+    public ApiResponse markMessagesAsRead(@RequestParam Long senderId, @RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             messageService.markAsRead(senderId, user.getId());
             return ApiResponse.success("标记成功");
@@ -110,11 +126,15 @@ public class MessageController {
     }
 
     @GetMapping("/unread/count/{senderId}")
-    public ApiResponse getUnreadMessageCountFromSender(@PathVariable Long senderId, HttpSession session) {
+    public ApiResponse getUnreadMessageCountFromSender(@PathVariable Long senderId, @RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             Long count = messageService.getUnreadCountFromSender(senderId, user.getId());
             return ApiResponse.success("获取成功", count);
@@ -125,11 +145,15 @@ public class MessageController {
     }
 
     @GetMapping("/contact/check")
-    public ApiResponse checkContactExists(@RequestParam Long otherUserId, HttpSession session) {
+    public ApiResponse checkContactExists(@RequestParam Long otherUserId, @RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             boolean exists = messageService.checkContactExists(user.getId(), otherUserId);
             return ApiResponse.success("检查成功", exists);
