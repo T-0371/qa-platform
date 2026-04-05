@@ -713,7 +713,7 @@ async function loadSystemConfig() {
     var cacheTime = localStorage.getItem('systemConfigTime');
     var now = Date.now();
 
-    if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 5000) {
+    if (cachedConfig && cacheTime && (now - parseInt(cacheTime)) < 1000) {
         try {
             var config = JSON.parse(cachedConfig);
             applySystemConfig(config);
@@ -723,7 +723,15 @@ async function loadSystemConfig() {
         }
     }
 
-    // 如果已经有请求正在进行中，等待该请求完成
+    if (cachedConfig) {
+        try {
+            var config = JSON.parse(cachedConfig);
+            applySystemConfig(config);
+        } catch (e) {
+            console.error('解析缓存配置失败:', e);
+        }
+    }
+
     if (loadSystemConfig.loading) {
         return loadSystemConfig.loading;
     }
@@ -741,12 +749,6 @@ async function loadSystemConfig() {
             }
         } catch (error) {
             console.error('加载系统配置失败:', error);
-            if (cachedConfig) {
-                try {
-                    var config = JSON.parse(cachedConfig);
-                    applySystemConfig(config);
-                } catch (e) {}
-            }
         } finally {
             loadSystemConfig.loading = null;
         }
