@@ -63,7 +63,8 @@ public class NotificationController {
                 user.setId(userId);
             }
             int count = notificationService.getUnreadCount(user.getId());
-            return ApiResponse.success("获取成功", count);
+            // 返回带有 count 字段的对象，与前端期望的结构一致
+            return ApiResponse.success("获取成功", new java.util.HashMap<String, Object>() {{ put("count", count); }});
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("获取失败: " + e.getMessage());
