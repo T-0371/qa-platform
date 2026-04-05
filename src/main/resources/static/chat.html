@@ -309,6 +309,24 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
+        .loading-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .error-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #ef4444;
+            font-size: 16px;
+        }
+        
         .hidden {
             display: none !important;
         }
@@ -847,41 +865,52 @@
         }
         
         async function init() {
-            await initCurrentUser();
+            console.log('开始初始化聊天页面...');
             
-            if (!currentUser) {
-                showMessage('请先登录', 'error');
-                setTimeout(function() {
-                    window.location.href = '/login.html';
-                }, 1500);
-                return;
-            }
+            // 并行初始化操作，提高加载速度
+            const initPromises = [];
             
+            // 1. 初始化当前用户
+            const userInitPromise = initCurrentUser().then(() => {
+                if (!currentUser) {
+                    showMessage('请先登录', 'error');
+                    setTimeout(function() {
+                        window.location.href = '/login.html';
+                    }, 1500);
+                    throw new Error('用户未登录');
+                }
+            });
+            initPromises.push(userInitPromise);
+            
+            // 2. 解析URL参数
             const urlParams = new URLSearchParams(window.location.search);
             selectedUserId = urlParams.get('userId');
             questionId = getQuestionIdFromUrl();
-            const isInitiator = urlParams.get('initiator');
-            const timestamp = urlParams.get('t');
             
             console.log('URL参数解析:', {
                 selectedUserId: selectedUserId,
-                questionId: questionId,
-                isInitiator: isInitiator,
-                timestamp: timestamp
+                questionId: questionId
             });
             
             if (questionId) {
                 document.getElementById('backToQuestionBtn').classList.remove('hidden');
             }
             
-            // 注意：通过消息通知进入时，积分逻辑由selectUser函数处理
-            // 这里不再重复处理，避免重复积分
-            
-            connectWebSocket();
-            Promise.all([loadUsers(), loadRecentConversations()]);
-            
-            if (typeof loadSystemConfig === 'function') {
-                loadSystemConfig();
+            try {
+                // 等待用户初始化完成
+                await userInitPromise;
+                
+                // 3. 并行执行其他初始化操作
+                await Promise.all([
+                    connectWebSocket(),
+                    loadUsers(),
+                    loadRecentConversations(),
+                    typeof loadSystemConfig === 'function' ? loadSystemConfig() : Promise.resolve()
+                ]);
+                
+                console.log('聊天页面初始化完成');
+            } catch (error) {
+                console.error('初始化失败:', error);
             }
         }
         
@@ -903,80 +932,103 @@
         }
         
         function connectWebSocket() {
-            console.log('开始连接WebSocket...');
-            console.log('当前用户状态:', currentUser);
-            console.log('isConnected状态:', isConnected);
-            console.log('stompClient状态:', stompClient);
-            
-            if (!currentUser || !currentUser.id) {
-                console.error('用户未初始化，无法连接WebSocket');
-                updateConnectionStatus(false);
-                return;
-            }
-            
-            try {
-                console.log('当前用户:', currentUser);
-                const socket = new SockJS('/ws?userId=' + currentUser.id);
-                console.log('SockJS创建成功:', socket);
-                stompClient = Stomp.over(socket);
-                console.log('Stomp客户端创建成功:', stompClient);
+            return new Promise((resolve, reject) => {
+                console.log('开始连接WebSocket...');
+                console.log('当前用户状态:', currentUser);
+                console.log('isConnected状态:', isConnected);
+                console.log('stompClient状态:', stompClient);
                 
-                // 禁用STOMP的心跳检测，避免连接不稳定
-                stompClient.heartbeat.outgoing = 0;
-                stompClient.heartbeat.incoming = 0;
+                if (!currentUser || !currentUser.id) {
+                    console.error('用户未初始化，无法连接WebSocket');
+                    updateConnectionStatus(false);
+                    reject(new Error('用户未初始化'));
+                    return;
+                }
                 
-                const headers = {'userId': currentUser.id.toString()};
-                console.log('WebSocket连接头:', headers);
-                stompClient.connect(
-                    headers,
-                    function(frame) {
-                    console.log('WebSocket连接成功:', frame);
-                    isConnected = true;
-                    updateConnectionStatus(true);
-                    
-                    // 加载用户在线状态
-                    loadUserOnlineStatus();
-                    
-                    // 启动定期轮询用户状态，确保在线状态实时更新
-                    startStatusPolling();
-                    
-                    // 发送在线状态
-                    sendUserStatus('ONLINE', selectedUserId);
-                    
-                    // 只订阅用户特定的消息队列，避免消息重复接收
-                    stompClient.subscribe('/user/queue/messages', function(message) {
-                        const chatMessage = JSON.parse(message.body);
-                        console.log('收到私有消息:', chatMessage);
-                        handleIncomingMessage(chatMessage);
+                try {
+                    console.log('当前用户:', currentUser);
+                    const socket = new SockJS('/ws?userId=' + currentUser.id, null, {
+                        timeout: 10000, // 设置10秒超时
+                        transports: ['websocket', 'xhr-streaming', 'xhr-polling'] // 优先使用websocket
                     });
+                    console.log('SockJS创建成功:', socket);
+                    stompClient = Stomp.over(socket);
+                    console.log('Stomp客户端创建成功:', stompClient);
                     
-                    // 订阅广播消息，用于系统通知等
-                    stompClient.subscribe('/topic/messages', function(message) {
-                        const chatMessage = JSON.parse(message.body);
-                        console.log('收到广播消息:', chatMessage);
-                        // 只处理系统通知，不处理聊天消息
-                        if (chatMessage.type === 'CONFIG_UPDATE') {
-                            handleIncomingMessage(chatMessage);
-                        }
-                    });
+                    // 优化STOMP配置
+                    stompClient.heartbeat.outgoing = 20000; // 每20秒发送一次心跳
+                    stompClient.heartbeat.incoming = 30000; // 每30秒接收一次心跳
+                    stompClient.reconnect_delay = 3000; // 重连延迟3秒
                     
-                    // 订阅用户状态消息
-                    stompClient.subscribe('/topic/status', function(message) {
-                        const statusMessage = JSON.parse(message.body);
-                        handleUserStatusMessage(statusMessage);
-                    });
-                }, function(error) {
-                    console.error('WebSocket连接失败:', error);
+                    const headers = {'userId': currentUser.id.toString()};
+                    console.log('WebSocket连接头:', headers);
+                    
+                    // 设置连接超时
+                    const connectTimeout = setTimeout(() => {
+                        console.error('WebSocket连接超时');
+                        updateConnectionStatus(false);
+                        reject(new Error('连接超时'));
+                    }, 10000);
+                    
+                    stompClient.connect(
+                        headers,
+                        function(frame) {
+                            clearTimeout(connectTimeout);
+                            console.log('WebSocket连接成功:', frame);
+                            isConnected = true;
+                            updateConnectionStatus(true);
+                            
+                            // 加载用户在线状态
+                            loadUserOnlineStatus();
+                            
+                            // 启动定期轮询用户状态，确保在线状态实时更新
+                            startStatusPolling();
+                            
+                            // 发送在线状态
+                            sendUserStatus('ONLINE', selectedUserId);
+                            
+                            // 只订阅用户特定的消息队列，避免消息重复接收
+                            stompClient.subscribe('/user/queue/messages', function(message) {
+                                const chatMessage = JSON.parse(message.body);
+                                console.log('收到私有消息:', chatMessage);
+                                handleIncomingMessage(chatMessage);
+                            });
+                            
+                            // 订阅广播消息，用于系统通知等
+                            stompClient.subscribe('/topic/messages', function(message) {
+                                const chatMessage = JSON.parse(message.body);
+                                console.log('收到广播消息:', chatMessage);
+                                // 只处理系统通知，不处理聊天消息
+                                if (chatMessage.type === 'CONFIG_UPDATE') {
+                                    handleIncomingMessage(chatMessage);
+                                }
+                            });
+                            
+                            // 订阅用户状态消息
+                            stompClient.subscribe('/topic/status', function(message) {
+                                const statusMessage = JSON.parse(message.body);
+                                handleUserStatusMessage(statusMessage);
+                            });
+                            
+                            resolve();
+                        }, function(error) {
+                            clearTimeout(connectTimeout);
+                            console.error('WebSocket连接失败:', error);
+                            isConnected = false;
+                            updateConnectionStatus(false);
+                            // 立即重试连接
+                            setTimeout(connectWebSocket, 3000);
+                            reject(error);
+                        });
+                } catch (error) {
+                    console.error('WebSocket连接异常:', error);
                     isConnected = false;
                     updateConnectionStatus(false);
-                    setTimeout(connectWebSocket, 5000);
-                });
-            } catch (error) {
-                console.error('WebSocket连接异常:', error);
-                isConnected = false;
-                updateConnectionStatus(false);
-                setTimeout(connectWebSocket, 5000);
-            }
+                    // 立即重试连接
+                    setTimeout(connectWebSocket, 3000);
+                    reject(error);
+                }
+            });
         }
         
         function updateConnectionStatus(connected) {
@@ -1121,10 +1173,14 @@
             }
             
             try {
-                // 加载最近聊天记录
-                const recentResponse = await fetch(`/messages/recent?userId=${currentUserId}`);
-                const recentData = await recentResponse.json();
+                // 并行加载最近聊天记录和所有用户
+                const [recentData, usersData] = await Promise.all([
+                    fetch(`/messages/recent?userId=${currentUserId}`).then(r => r.json()),
+                    fetch('/users').then(r => r.json())
+                ]);
+                
                 console.log('最近聊天数据:', recentData);
+                console.log('用户列表数据:', usersData);
                 
                 let chatUserIds = new Set();
                 let chatUserMap = new Map();
@@ -1150,10 +1206,6 @@
                         console.log('聊天过的用户:', chatUserMap);
                     }
                 }
-                
-                // 加载所有用户
-                const usersResponse = await fetch('/users');
-                const usersData = await usersResponse.json();
                 
                 if (usersData && usersData.code === 200) {
                     allUsers = [];
@@ -1505,9 +1557,20 @@
         function loadConversation(userId) {
             console.log('加载聊天记录，用户ID:', userId, '当前用户ID:', currentUser.id);
             console.log('请求URL:', `/messages/conversation/${userId}?currentUserId=${currentUser.id}`);
-            fetch(`/messages/conversation/${userId}?currentUserId=${currentUser.id}`)
+            
+            // 显示加载状态
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '<div class="loading-message">加载中...</div>';
+            
+            // 使用 fetch 并设置超时
+            fetch(`/messages/conversation/${userId}?currentUserId=${currentUser.id}`, {
+                timeout: 10000 // 10秒超时
+            })
                 .then(response => {
                     console.log('响应状态:', response.status);
+                    if (!response.ok) {
+                        throw new Error('网络响应失败');
+                    }
                     return response.json();
                 })
                 .then(data => {
@@ -1517,10 +1580,12 @@
                         renderMessages(data.data);
                     } else {
                         console.error('加载聊天记录失败:', data.message);
+                        container.innerHTML = '<div class="error-message">加载失败，请重试</div>';
                     }
                 })
                 .catch(error => {
                     console.error('加载聊天记录异常:', error);
+                    container.innerHTML = '<div class="error-message">加载失败，请重试</div>';
                 });
         }
         
@@ -1741,8 +1806,12 @@
                 // 标记为已读
                 markMessagesAsRead(message.senderId);
             } else {
-                // 其他消息，更新会话列表
+                // 其他消息，更新会话列表和通知徽章
                 loadRecentConversations();
+                // 更新通知徽章
+                if (typeof updateNotificationBadge === 'function') {
+                    updateNotificationBadge();
+                }
             }
         }
         
