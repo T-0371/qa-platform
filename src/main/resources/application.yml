@@ -20,7 +20,7 @@ spring:
       max-request-size: 10MB
   web:
     resources:
-      static-locations: classpath:/static/,file:E:/Test/XiangMu/LunTan_Demo/qa-platform/uploads/
+      static-locations: classpath:/static/,file:./uploads/
       cache:
         period: 86400
   jmx:
@@ -64,7 +64,7 @@ server:
 
 file:
   upload:
-    path: E:/Test/XiangMu/LunTan_Demo/qa-platform/uploads/
+    path: ./uploads/
 
 logging:
   level:
