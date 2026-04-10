@@ -31,12 +31,26 @@ public class SystemConfigServiceImpl implements SystemConfigService {
             wrapper.last("LIMIT 1");
             List<SystemConfig> configs = systemConfigMapper.selectList(wrapper);
             if (configs.isEmpty()) {
+                createTableAndInsertDefault();
+                // 重新查询数据库获取最新配置
+                configs = systemConfigMapper.selectList(wrapper);
+                if (!configs.isEmpty()) {
+                    return configs.get(0);
+                }
                 return getDefaultConfig();
             }
             return configs.get(0);
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("doesn't exist")) {
                 createTableAndInsertDefault();
+                // 重新查询数据库获取最新配置
+                QueryWrapper<SystemConfig> wrapper = new QueryWrapper<>();
+                wrapper.orderByDesc("id");
+                wrapper.last("LIMIT 1");
+                List<SystemConfig> configs = systemConfigMapper.selectList(wrapper);
+                if (!configs.isEmpty()) {
+                    return configs.get(0);
+                }
                 return getDefaultConfig();
             }
             throw e;
