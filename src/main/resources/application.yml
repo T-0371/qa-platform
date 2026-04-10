@@ -68,11 +68,11 @@ file:
 
 logging:
   level:
-    root: WARN
-    com.example.qa: WARN
-    com.example.qa.mapper: OFF
-    org.springframework: WARN
-    org.mybatis: OFF
-    org.apache: OFF
+    root: INFO
+    com.example.qa: INFO
+    com.example.qa.mapper: INFO
+    org.springframework: INFO
+    org.mybatis: INFO
+    org.apache: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

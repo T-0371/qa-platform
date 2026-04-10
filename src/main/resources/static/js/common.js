@@ -1072,12 +1072,16 @@ async function loadConfigFromServer() {
 }
 
 async function loadSystemConfig() {
+    console.log('🔄 开始加载系统配置...');
     // 首先尝试从本地存储加载（同步）
     const loadedFromStorage = loadConfigFromStorage();
+    console.log('📱 从本地存储加载配置:', loadedFromStorage ? '成功' : '失败');
     
     // 然后异步从服务器更新，不阻塞页面渲染
     setTimeout(async () => {
-        await loadConfigFromServer();
+        console.log('🌐 从服务器加载最新配置...');
+        const loadedFromServer = await loadConfigFromServer();
+        console.log('🌐 从服务器加载配置:', loadedFromServer ? '成功' : '失败');
     }, 100); // 延迟一点时间，确保页面先渲染
 }
 

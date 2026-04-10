@@ -4,10 +4,12 @@ import com.example.qa.entity.User;
 import com.example.qa.entity.Question;
 import com.example.qa.entity.Answer;
 import com.example.qa.entity.Tag;
+import com.example.qa.entity.SystemConfig;
 import com.example.qa.mapper.UserMapper;
 import com.example.qa.mapper.QuestionMapper;
 import com.example.qa.mapper.AnswerMapper;
 import com.example.qa.mapper.TagMapper;
+import com.example.qa.mapper.SystemConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -32,12 +34,17 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private TagMapper tagMapper;
     
+    @Autowired
+    private SystemConfigMapper systemConfigMapper;
+    
     @Override
     public void run(String... args) throws Exception {
         initializeUsers();
         initializeTags();
         initializeQuestions();
         initializeAnswers();
+        // 暂时注释掉系统配置初始化，避免启动卡住
+        // initializeSystemConfig();
     }
     
     private void initializeUsers() {
@@ -208,6 +215,28 @@ public class DataInitializer implements CommandLineRunner {
                     answerMapper.insert(answer);
                 }
             }
+        }
+    }
+    
+    private void initializeSystemConfig() {
+        try {
+            if (systemConfigMapper.selectCount(null) == 0) {
+                SystemConfig config = SystemConfig.builder()
+                    .siteName("TechQA")
+                    .siteDescription("探索技术前沿 · 分享编程智慧 · 共同成长进步")
+                    .backgroundType("gradient")
+                    .backgroundValue("linear-gradient(145deg, #0f0f1e 0%, #1a1a2e 25%, #16213e 50%, #0d0d1a 75%, #0a0a14 100%)")
+                    .layoutType("default")
+                    .primaryColor("#ec4899")
+                    .secondaryColor("#8b5cf6")
+                    .createdAt(new Date())
+                    .updatedAt(new Date())
+                    .build();
+                systemConfigMapper.insert(config);
+                System.out.println("✅ 系统配置初始化完成");
+            }
+        } catch (Exception e) {
+            System.out.println("⚠️ 系统配置初始化失败，可能是表不存在，将在首次访问时自动创建: " + e.getMessage());
         }
     }
 }

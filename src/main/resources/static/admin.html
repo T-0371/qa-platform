@@ -2596,15 +2596,21 @@
         
         async function loadSystemConfig() {
             try {
+                console.log('🔄 开始加载系统配置...');
                 const res = await fetch(API_BASE_URL + '/system-config');
                 if (!res.ok) {
                     console.error('加载系统配置失败，HTTP状态:', res.status);
+                    showMessage('加载系统配置失败', 'error');
                     return;
                 }
                 const data = await res.json();
                 
+                console.log('📋 系统配置响应:', data);
+                
                 if (data.code === 200 && data.data) {
                     const config = data.data;
+                    console.log('✅ 系统配置数据:', config);
+                    
                     document.getElementById('siteName').value = config.siteName || '';
                     document.getElementById('siteDescription').value = config.siteDescription || '';
                     document.getElementById('backgroundType').value = config.backgroundType || 'gradient';
@@ -2620,16 +2626,27 @@
                     // 切换背景类型相关字段显示
                     toggleBackgroundFields();
                     
-                    // 如果有图片背景，显示预览
+                    // 显示图片预览
+                    const imagePreview = document.getElementById('imagePreview');
+                    const previewImg = document.getElementById('previewImg');
+                    
                     if (config.backgroundType === 'image' && config.backgroundValue) {
-                        const imagePreview = document.getElementById('imagePreview');
-                        const previewImg = document.getElementById('previewImg');
+                        console.log('🖼️ 显示背景图片预览:', config.backgroundValue);
                         previewImg.src = config.backgroundValue;
                         imagePreview.style.display = 'block';
+                    } else {
+                        console.log('🖼️ 隐藏背景图片预览');
+                        imagePreview.style.display = 'none';
                     }
+                    
+                    showMessage('系统配置加载成功', 'success');
+                } else {
+                    console.error('系统配置加载失败:', data.message || '未知错误');
+                    showMessage('系统配置加载失败', 'error');
                 }
             } catch (error) {
                 console.error('加载系统配置失败:', error);
+                showMessage('加载系统配置失败', 'error');
             }
         }
         
