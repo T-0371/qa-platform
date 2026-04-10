@@ -12,7 +12,7 @@ import java.util.UUID;
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
 
-    @Value("${file.upload.path:E:/Test/XiangMu/LunTan_Demo/qa-platform/uploads/}")
+    @Value("${file.upload.path:./uploads/}")
     private String uploadPath;
 
     @Override
