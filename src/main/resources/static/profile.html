@@ -641,6 +641,25 @@
             color: #6b7280;
         }
         
+        .form-group input[readonly] {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+            cursor: not-allowed !important;
+            border-color: #cbd5e1 !important;
+            font-weight: 500 !important;
+            opacity: 1 !important;
+        }
+        
+        .form-group input[readonly]:focus {
+            border-color: #cbd5e1 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        
+        .form-group input[readonly]::placeholder {
+            color: #94a3b8 !important;
+        }
+        
         .form-group textarea {
             min-height: 120px;
             resize: vertical;
@@ -912,7 +931,7 @@
         }
         
         .pagination-info {
-            color: #9ca3af;
+            color: #fafafb;
             font-size: 14px;
             margin: 0 10px;
             font-weight: 500;
@@ -1171,6 +1190,101 @@
                 font-size: 13px;
             }
         }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 24px;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            border-radius: 12px;
+            padding: 16px 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .pagination-info {
+            color: #e2e8f0;
+            font-size: 14px;
+            margin: 0 12px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 24px;
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .page-size-selector label {
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .page-size-selector select {
+            padding: 8px 14px;
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            background: rgba(26, 26, 46, 0.6);
+            color: #ffffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
+        }
+
+        .page-size-selector select:focus,
+        .page-size-selector select:hover {
+            outline: none;
+            border-color: #ec4899;
+        }
+
+        .pagination button {
+            padding: 10px 16px;
+            border: 2px solid rgba(236, 72, 153, 0.3);
+            background: rgba(26, 26, 46, 0.9);
+            color: #e2e8f0;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            margin: 0 2px;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: rgba(236, 72, 153, 0.3);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
+        }
+
+        .pagination button.active {
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+            font-weight: 700;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: rgba(26, 26, 46, 0.6);
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body>
@@ -1327,19 +1441,47 @@
                 <div id="myQuestionsList">
                     <p style="text-align: center; color: #9ca3af; padding: 40px;">加载中...</p>
                 </div>
-                <div id="questionsPagination" class="pagination"></div>
+                <div id="questionsPagination" class="pagination">
+                    <div class="pagination-info">
+                        共 <span id="questionsTotalCount">0</span> 条，
+                        第 <span id="questionsCurrentPage">1</span> / <span id="questionsTotalPages">1</span> 页
+                    </div>
+                    <div class="page-size-selector">
+                        <label for="questionsPageSize">每页显示：</label>
+                        <select id="questionsPageSize" onchange="changeProfileQuestionsPageSize(this.value)">
+                            <option value="5">5条</option>
+                            <option value="10" selected>10条</option>
+                            <option value="20">20条</option>
+                            <option value="50">50条</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-            
+
             <div id="answersTab" class="profile-tab-content">
                 <div id="myAnswersList">
                     <p style="text-align: center; color: #9ca3af; padding: 40px;">加载中...</p>
                 </div>
-                <div id="answersPagination" class="pagination"></div>
+                <div id="answersPagination" class="pagination">
+                    <div class="pagination-info">
+                        共 <span id="answersTotalCount">0</span> 条，
+                        第 <span id="answersCurrentPage">1</span> / <span id="answersTotalPages">1</span> 页
+                    </div>
+                    <div class="page-size-selector">
+                        <label for="answersPageSize">每页显示：</label>
+                        <select id="answersPageSize" onchange="changeProfileAnswersPageSize(this.value)">
+                            <option value="5">5条</option>
+                            <option value="10" selected>10条</option>
+                            <option value="20">20条</option>
+                            <option value="50">50条</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
-    <script src="/js/common.js"></script>
+    <script src="/js/common.js?v=202604070600"></script>
     <script>
         function toggleMobileMenu() {
             const nav = document.getElementById('mainNav');
@@ -1382,19 +1524,46 @@
         async function loadProfile() {
             var user = localStorage.getItem('user');
             if (!user) {
+                showMessage('请先登录', 'error');
+                setTimeout(function() { window.location.href = '/login.html'; }, 1500);
                 return;
             }
             
+            var localUser = null;
             try {
-                userProfile = JSON.parse(user);
+                localUser = JSON.parse(user);
+                console.log('本地用户数据:', localUser);
             } catch (error) {
                 console.error('解析用户数据失败：', error);
-                localStorage.removeItem('user');
-                showMessage('登录已过期，请重新登录', 'error');
-                setTimeout(function() {
-                    window.location.href = '/login.html';
-                }, 1500);
-                return;
+            }
+            
+            // 始终从API获取最新用户数据作为主要来源
+            if (localUser && localUser.id) {
+                console.log('从API加载用户信息, userId=', localUser.id);
+                try {
+                    var resp = await fetch('/api/users/' + localUser.id);
+                    if (resp.ok) {
+                        var apiData = await resp.json();
+                        console.log('API返回用户数据:', apiData);
+                        if (apiData.code === 200 && apiData.data) {
+                            userProfile = apiData.data;
+                            localStorage.setItem('user', JSON.stringify(userProfile));
+                            console.log('使用API数据填充页面:', userProfile);
+                        } else {
+                            userProfile = localUser;
+                            console.warn('API返回异常，使用本地数据');
+                        }
+                    } else {
+                        userProfile = localUser;
+                        console.warn('API请求失败，使用本地数据, status=', resp.status);
+                    }
+                } catch(e) {
+                    console.warn('从API加载用户信息失败，使用本地数据:', e);
+                    userProfile = localUser;
+                }
+            } else {
+                userProfile = localUser;
+                console.warn('本地无userId，无法调用API');
             }
             
             var avatarUrl = userProfile.avatar && userProfile.avatar.trim() !== '' ? userProfile.avatar : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23667eea"/%3E%3Ctext x="50" y="60" text-anchor="middle" fill="white" font-size="40"%3E%3F%3C/text%3E%3C/svg%3E';
@@ -1419,7 +1588,9 @@
             document.getElementById('phone').value = userProfile.phone || '';
             document.getElementById('bio').value = userProfile.bio || '';
             document.getElementById('securityQuestion').value = userProfile.securityQuestion || '';
-            document.getElementById('securityAnswer').value = userProfile.securityAnswer || '';
+            var secAnswer = userProfile.securityAnswer || '';
+            document.getElementById('securityAnswer').value = secAnswer ? '*'.repeat(Math.min(secAnswer.length, 20)) : '';
+            document.getElementById('securityAnswer').setAttribute('data-real-value', secAnswer);
             
             loadMyQuestions();
             loadMyAnswers();
@@ -1440,23 +1611,46 @@
         async function loadMyQuestions() {
             var listDiv = document.getElementById('myQuestionsList');
             listDiv.innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 40px;">加载中...</p>';
-            
+
             try {
-                var response = await fetch(API_BASE_URL + '/questions');
+                console.log('📥 开始加载我的问题...');
+                var user = JSON.parse(localStorage.getItem('user') || '{}');
+                console.log('✅ 当前用户:', user);
+
+                // 获取所有问题（不分页，获取全部用于筛选）
+                var response = await fetch(API_BASE_URL + '/questions?page=1&size=1000');
                 var data = await response.json();
-                
+
+                console.log('📋 问题列表API响应:', data);
+
                 if (data.code == 200) {
-                    myQuestions = data.data.filter(function(q) {
-                        return q.userId == userProfile.id;
+                    let allQuestions = [];
+
+                    // 兼容多种数据格式
+                    if (Array.isArray(data.data)) {
+                        allQuestions = data.data;
+                    } else if (data.data && Array.isArray(data.data.records)) {
+                        allQuestions = data.data.records;
+                    } else if (data.data) {
+                        allQuestions = [data.data];
+                    }
+
+                    console.log('✅ 获取到所有问题数:', allQuestions.length);
+
+                    // 筛选当前用户的问题
+                    myQuestions = allQuestions.filter(function(q) {
+                        return q.userId == user.id || q.userId == user.userId;
                     });
-                    
+
+                    console.log('✅ 我的问题数量:', myQuestions.length);
                     document.getElementById('questionsCount').textContent = myQuestions.length;
                     displayMyQuestions();
                 } else {
-                    showMessage('加载问题失败：' + data.message, 'error');
+                    console.error('❌ 加载问题失败：', data.message);
+                    showMessage('加载问题失败：' + (data.message || '未知错误'), 'error');
                 }
             } catch (error) {
-                console.error('加载问题失败：', error);
+                console.error('❌ 加载问题异常：', error);
                 showMessage('加载问题失败，请检查后端服务是否启动', 'error');
             }
         }
@@ -1481,8 +1675,8 @@
             } else {
                 listDiv.innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 40px;">暂无问题</p>';
             }
-            
-            updateProfilePagination('questions', myQuestions, questionsCurrentPage, 'questionsPagination');
+
+            updateQuestionsPagination();
         }
         
         async function loadMyAnswers() {
@@ -1529,8 +1723,8 @@
             } else {
                 listDiv.innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 40px;">暂无回答</p>';
             }
-            
-            updateProfilePagination('answers', myAnswers, answersCurrentPage, 'answersPagination');
+
+            updateAnswersPagination();
         }
         
         function handleAvatarChange(event) {
@@ -1586,7 +1780,11 @@
             var phone = document.getElementById('phone').value.trim();
             var bio = document.getElementById('bio').value.trim();
             var securityQuestion = document.getElementById('securityQuestion').value;
-            var securityAnswer = document.getElementById('securityAnswer').value.trim();
+            var securityAnswerInput = document.getElementById('securityAnswer');
+            var securityAnswer = securityAnswerInput.value.trim();
+            if (securityAnswer && /^\*+$/.test(securityAnswer)) {
+                securityAnswer = securityAnswerInput.getAttribute('data-real-value') || '';
+            }
             
             var saveBtn = document.getElementById('saveBtn');
             saveBtn.disabled = true;
@@ -1657,70 +1855,198 @@
             }
         }
         
-        function updateProfilePagination(type, data, currentPage, paginationId) {
-            var paginationDiv = document.getElementById(paginationId);
-            paginationDiv.innerHTML = '';
-            
-            var totalPages = Math.ceil(data.length / pageSize);
-            
-            var infoDiv = document.createElement('div');
-            infoDiv.className = 'pagination-info';
-            infoDiv.textContent = '共 ' + data.length + ' 条，第 ' + currentPage + ' / ' + totalPages + ' 页';
-            paginationDiv.appendChild(infoDiv);
-            
-            if (totalPages <= 1) {
+        function updateQuestionsPagination() {
+            console.log('🎨 updateQuestionsPagination 开始执行...');
+            const paginationDiv = document.getElementById('questionsPagination');
+            if (!paginationDiv) {
+                console.error('❌ 找不到 questionsPagination 容器');
                 return;
             }
-            
-            var prevButton = document.createElement('button');
+
+            // 强制显示分页器（确保可见）
+            paginationDiv.style.display = 'flex';
+            paginationDiv.style.visibility = 'visible';
+            paginationDiv.style.opacity = '1';
+
+            const totalCount = myQuestions.length;
+            const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+            console.log('📊 分页数据 - 总数:', totalCount, '当前页:', questionsCurrentPage, '每页:', pageSize, '总页数:', totalPages);
+
+            const totalCountEl = document.getElementById('questionsTotalCount');
+            const currentPageNumEl = document.getElementById('questionsCurrentPage');
+            const totalPageNumEl = document.getElementById('questionsTotalPages');
+
+            if (totalCountEl) {
+                totalCountEl.textContent = totalCount;
+                totalCountEl.style.color = '#10b981'; // 绿色高亮
+                totalCountEl.style.fontWeight = '700';
+            } else {
+                console.error('❌ 找不到 questionsTotalCount 元素');
+            }
+
+            if (currentPageNumEl) {
+                currentPageNumEl.textContent = questionsCurrentPage;
+                currentPageNumEl.style.color = '#60a5fa'; // 蓝色高亮
+                currentPageNumEl.style.fontWeight = '700';
+            } else {
+                console.error('❌ 找不到 questionsCurrentPage 元素');
+            }
+
+            if (totalPageNumEl) {
+                totalPageNumEl.textContent = totalPages;
+                totalPageNumEl.style.color = '#f59e0b'; // 橙色高亮
+                totalPageNumEl.style.fontWeight = '700';
+            } else {
+                console.error('❌ 找不到 questionsTotalPages 元素');
+            }
+
+            const existingButtons = paginationDiv.querySelectorAll('button');
+            existingButtons.forEach(button => button.remove());
+
+            if (totalPages <= 1) {
+                paginationDiv.style.display = 'flex';
+                return;
+            }
+
+            const prevButton = document.createElement('button');
             prevButton.textContent = '上一页';
-            prevButton.disabled = currentPage === 1;
+            prevButton.disabled = questionsCurrentPage === 1;
             prevButton.onclick = function() {
-                if (currentPage > 1) {
-                    if (type === 'questions') {
-                        questionsCurrentPage--;
-                        displayMyQuestions();
-                    } else if (type === 'answers') {
-                        answersCurrentPage--;
-                        displayMyAnswers();
-                    }
+                if (questionsCurrentPage > 1) {
+                    questionsCurrentPage--;
+                    displayMyQuestions();
                 }
             };
             paginationDiv.appendChild(prevButton);
-            
-            for (var i = 1; i <= totalPages; i++) {
-                var pageButton = document.createElement('button');
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
                 pageButton.textContent = i;
-                pageButton.className = i === currentPage ? 'active' : '';
-                pageButton.onclick = function(page) {
+                pageButton.className = i === questionsCurrentPage ? 'active' : '';
+                pageButton.onclick = (function(page) {
                     return function() {
-                        if (type === 'questions') {
-                            questionsCurrentPage = page;
-                            displayMyQuestions();
-                        } else if (type === 'answers') {
-                            answersCurrentPage = page;
-                            displayMyAnswers();
-                        }
+                        questionsCurrentPage = page;
+                        displayMyQuestions();
                     };
-                }(i);
+                })(i);
                 paginationDiv.appendChild(pageButton);
             }
-            
-            var nextButton = document.createElement('button');
+
+            const nextButton = document.createElement('button');
             nextButton.textContent = '下一页';
-            nextButton.disabled = currentPage === totalPages;
+            nextButton.disabled = questionsCurrentPage === totalPages;
             nextButton.onclick = function() {
-                if (currentPage < totalPages) {
-                    if (type === 'questions') {
-                        questionsCurrentPage++;
-                        displayMyQuestions();
-                    } else if (type === 'answers') {
-                        answersCurrentPage++;
-                        displayMyAnswers();
-                    }
+                if (questionsCurrentPage < totalPages) {
+                    questionsCurrentPage++;
+                    displayMyQuestions();
                 }
             };
             paginationDiv.appendChild(nextButton);
+        }
+
+        function updateAnswersPagination() {
+            console.log('🎨 updateAnswersPagination 开始执行...');
+            const paginationDiv = document.getElementById('answersPagination');
+            if (!paginationDiv) {
+                console.error('❌ 找不到 answersPagination 容器');
+                return;
+            }
+
+            // 强制显示分页器（确保可见）
+            paginationDiv.style.display = 'flex';
+            paginationDiv.style.visibility = 'visible';
+            paginationDiv.style.opacity = '1';
+
+            const totalCount = myAnswers.length;
+            const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+            console.log('📊 分页数据 - 总数:', totalCount, '当前页:', answersCurrentPage, '每页:', pageSize, '总页数:', totalPages);
+
+            const totalCountEl = document.getElementById('answersTotalCount');
+            const currentPageNumEl = document.getElementById('answersCurrentPage');
+            const totalPageNumEl = document.getElementById('answersTotalPages');
+
+            if (totalCountEl) {
+                totalCountEl.textContent = totalCount;
+                totalCountEl.style.color = '#10b981'; // 绿色高亮
+                totalCountEl.style.fontWeight = '700';
+            } else {
+                console.error('❌ 找不到 answersTotalCount 元素');
+            }
+
+            if (currentPageNumEl) {
+                currentPageNumEl.textContent = answersCurrentPage;
+                currentPageNumEl.style.color = '#60a5fa'; // 蓝色高亮
+                currentPageNumEl.style.fontWeight = '700';
+            } else {
+                console.error('❌ 找不到 answersCurrentPage 元素');
+            }
+
+            if (totalPageNumEl) {
+                totalPageNumEl.textContent = totalPages;
+                totalPageNumEl.style.color = '#f59e0b'; // 橙色高亮
+                totalPageNumEl.style.fontWeight = '700';
+            } else {
+                console.error('❌ 找不到 answersTotalPages 元素');
+            }
+
+            const existingButtons = paginationDiv.querySelectorAll('button');
+            existingButtons.forEach(button => button.remove());
+
+            if (totalPages <= 1) {
+                paginationDiv.style.display = 'flex';
+                return;
+            }
+
+            const prevButton = document.createElement('button');
+            prevButton.textContent = '上一页';
+            prevButton.disabled = answersCurrentPage === 1;
+            prevButton.onclick = function() {
+                if (answersCurrentPage > 1) {
+                    answersCurrentPage--;
+                    displayMyAnswers();
+                }
+            };
+            paginationDiv.appendChild(prevButton);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.className = i === answersCurrentPage ? 'active' : '';
+                pageButton.onclick = (function(page) {
+                    return function() {
+                        answersCurrentPage = page;
+                        displayMyAnswers();
+                    };
+                })(i);
+                paginationDiv.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.textContent = '下一页';
+            nextButton.disabled = answersCurrentPage === totalPages;
+            nextButton.onclick = function() {
+                if (answersCurrentPage < totalPages) {
+                    answersCurrentPage++;
+                    displayMyAnswers();
+                }
+            };
+            paginationDiv.appendChild(nextButton);
+        }
+
+        function changeProfileQuestionsPageSize(newSize) {
+            console.log('🔄 切换我的问题每页条数:', newSize);
+            pageSize = parseInt(newSize);
+            questionsCurrentPage = 1;
+            displayMyQuestions();
+        }
+
+        function changeProfileAnswersPageSize(newSize) {
+            console.log('🔄 切换我的回答每页条数:', newSize);
+            pageSize = parseInt(newSize);
+            answersCurrentPage = 1;
+            displayMyAnswers();
         }
         
         // 主题功能 - 使用全局主题函数

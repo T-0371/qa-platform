@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @RestController
-@RequestMapping("/collects")
+@RequestMapping("/api/collects")
 public class CollectController {
 
     @Autowired

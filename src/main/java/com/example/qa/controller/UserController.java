@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
@@ -25,7 +26,8 @@ public class UserController {
             return ApiResponse.success("注册成功", user);
         } catch (Exception e) {
             e.printStackTrace();
-            return ApiResponse.error("注册失败: " + e.getMessage());
+            String errMsg = e.getMessage();
+            return ApiResponse.error("注册失败: " + (errMsg != null && !errMsg.isEmpty() ? errMsg : "请检查输入信息是否正确"));
         }
     }
 
@@ -149,19 +151,41 @@ public class UserController {
     }
 
     @PostMapping("/reset-password")
-    public ApiResponse resetPassword(@RequestParam String username, 
-                                    @RequestParam String securityAnswer, 
-                                    @RequestParam String newPassword) {
+    public ApiResponse resetPassword(@RequestBody Map<String, String> body) {
         try {
-            boolean verified = userService.verifySecurityAnswer(username, securityAnswer);
-            if (!verified) {
-                return ApiResponse.error("密保答案错误");
+            String username = body.get("username");
+            String newPassword = body.get("newPassword");
+            
+            if (username == null || username.isEmpty() || newPassword == null || newPassword.isEmpty()) {
+                return ApiResponse.error("参数不完整");
             }
+            
             userService.resetPassword(username, newPassword);
             return ApiResponse.success("密码重置成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("密码重置失败: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/verify-security-answer")
+    public ApiResponse verifySecurityAnswer(@RequestBody Map<String, String> body) {
+        try {
+            String username = body.get("username");
+            String securityAnswer = body.get("securityAnswer");
+            
+            if (username == null || username.isEmpty() || securityAnswer == null || securityAnswer.isEmpty()) {
+                return ApiResponse.error("参数不完整");
+            }
+            
+            boolean verified = userService.verifySecurityAnswer(username, securityAnswer);
+            if (!verified) {
+                return ApiResponse.error("密保答案错误");
+            }
+            return ApiResponse.success("验证成功", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("验证失败: " + (e.getMessage() != null ? e.getMessage() : "系统错误"));
         }
     }
 

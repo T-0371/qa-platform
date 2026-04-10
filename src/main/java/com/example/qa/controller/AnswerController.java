@@ -12,7 +12,7 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @RestController
-@RequestMapping("/answers")
+@RequestMapping("/api/answers")
 public class AnswerController {
 
     @Autowired

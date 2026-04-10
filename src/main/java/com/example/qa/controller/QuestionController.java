@@ -14,7 +14,7 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @RestController
-@RequestMapping("/questions")
+@RequestMapping("/api/questions")
 public class QuestionController {
 
     @Autowired
@@ -52,8 +52,8 @@ public class QuestionController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            List<Question> questions = questionService.getQuestionList(page, size);
-            return ApiResponse.success("获取成功", questions);
+            java.util.Map<String, Object> data = questionService.getQuestionListWithTotal(page, size);
+            return ApiResponse.success("获取成功", data);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error("获取失败: " + e.getMessage());

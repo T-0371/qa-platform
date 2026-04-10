@@ -869,7 +869,7 @@
                 </div>
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" class="form-input" placeholder="搜索用户..." id="userSearch">
+                    <input type="text" class="form-input" placeholder="搜索用户名或邮箱..." id="searchUserInput" onkeyup="if(event.key==='Enter')searchUsers()">
                 </div>
             </div>
             
@@ -878,7 +878,7 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>用户ID</th>
+                                <th>序号</th>
                                 <th>用户名</th>
                                 <th>邮箱</th>
                                 <th>角色</th>
@@ -905,7 +905,7 @@
                 </div>
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" class="form-input" placeholder="搜索问题..." id="questionSearch">
+                    <input type="text" class="form-input" placeholder="搜索问题标题..." id="searchQuestionInput" onkeyup="if(event.key==='Enter')searchQuestions()">
                 </div>
             </div>
             
@@ -914,7 +914,7 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>问题ID</th>
+                                <th>序号</th>
                                 <th>标题</th>
                                 <th>作者</th>
                                 <th>浏览</th>
@@ -1075,7 +1075,7 @@
     
     <script>
         // API基础URL
-        const API_BASE_URL = '';
+        const API_BASE_URL = '/api';
         
         // 当前页码
         let usersPage = 1;
@@ -1163,7 +1163,7 @@
                 const data = await res.json();
                 
                 if (data.code === 200) {
-                    renderUsersTable(data.data.records || []);
+                    renderUsersTable(data.data.records || [], page);
                     renderPagination('usersPagination', data.data.total, page, loadUsers);
                 }
             } catch (error) {
@@ -1172,7 +1172,8 @@
         }
         
         // 渲染用户表格
-        function renderUsersTable(users) {
+        function renderUsersTable(users, page) {
+            page = page || usersPage || 1;
             const tbody = document.getElementById('usersTableBody');
             
             if (users.length === 0) {
@@ -1180,9 +1181,11 @@
                 return;
             }
             
-            tbody.innerHTML = users.map(user => `
+            const startIndex = (page - 1) * pageSize;
+            
+            tbody.innerHTML = users.map((user, index) => `
                 <tr>
-                    <td>${user.id}</td>
+                    <td>${startIndex + index + 1}</td>
                     <td>${user.username}</td>
                     <td>${user.email}</td>
                     <td><span class="tag ${user.role === 'ADMIN' ? 'tag-danger' : 'tag-info'}">${user.role === 'ADMIN' ? '管理员' : '普通用户'}</span></td>
@@ -1204,7 +1207,7 @@
                 const data = await res.json();
                 
                 if (data.code === 200) {
-                    renderQuestionsTable(data.data.records || []);
+                    renderQuestionsTable(data.data.records || [], page);
                     renderPagination('questionsPagination', data.data.total, page, loadQuestions);
                 }
             } catch (error) {
@@ -1213,7 +1216,8 @@
         }
         
         // 渲染问题表格
-        function renderQuestionsTable(questions) {
+        function renderQuestionsTable(questions, page) {
+            page = page || questionsPage || 1;
             const tbody = document.getElementById('questionsTableBody');
             
             if (questions.length === 0) {
@@ -1221,9 +1225,11 @@
                 return;
             }
             
-            tbody.innerHTML = questions.map(q => `
+            const startIndex = (page - 1) * pageSize;
+            
+            tbody.innerHTML = questions.map((q, index) => `
                 <tr>
-                    <td>${q.id}</td>
+                    <td>${startIndex + index + 1}</td>
                     <td>${q.title}</td>
                     <td>${q.userName || '未知用户'}</td>
                     <td>${q.viewCount || 0}</td>
@@ -1452,6 +1458,7 @@
                 if (data.code === 200) {
                     showMessage('用户已删除', 'success');
                     loadUsers(usersPage);
+                    loadDashboardStats();
                 }
             } catch (error) {
                 showMessage('删除失败: ' + error.message, 'error');
@@ -1472,9 +1479,58 @@
                 if (data.code === 200) {
                     showMessage('问题已删除', 'success');
                     loadQuestions(questionsPage);
+                    loadDashboardStats();
                 }
             } catch (error) {
                 showMessage('删除失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 搜索用户
+        async function searchUsers() {
+            var keyword = document.getElementById('searchUserInput').value.trim();
+            if (!keyword) {
+                loadUsers(usersPage);
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE_URL}/users?keyword=${encodeURIComponent(keyword)}&page=1&size=${pageSize}`);
+                const data = await res.json();
+                
+                if (data.code === 200) {
+                    renderUsersTable(data.data.records || [], 1);
+                    renderPagination('usersPagination', data.data.total, 1, (p) => {
+                        usersPage = p;
+                        searchUsers();
+                    });
+                }
+            } catch (error) {
+                console.error('搜索用户失败:', error);
+            }
+        }
+        
+        // 搜索问题
+        async function searchQuestions() {
+            var keyword = document.getElementById('searchQuestionInput').value.trim();
+            if (!keyword) {
+                loadQuestions(questionsPage);
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE_URL}/questions?keyword=${encodeURIComponent(keyword)}&page=1&size=${pageSize}`);
+                const data = await res.json();
+                
+                if (data.code === 200) {
+                    renderQuestionsTable(data.data.records || [], 1);
+                    renderPagination('questionsPagination', data.data.total, 1, (p) => {
+                        questionsPage = p;
+                        searchQuestions();
+                    });
+                }
+            } catch (error) {
+                console.error('搜索问题失败:', error);
             }
         }
         

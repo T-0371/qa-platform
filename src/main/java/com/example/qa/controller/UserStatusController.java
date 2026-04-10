@@ -1,49 +1,65 @@
 package com.example.qa.controller;
 
+import com.example.qa.dto.response.ApiResponse;
+import com.example.qa.service.UserStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
+@RequestMapping("/api/user")
 public class UserStatusController {
 
     @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-    
-    // 存储用户聊天状态的全局缓存
-    private static final Map<Long, Long> userChatStatus = new ConcurrentHashMap<>();
-    
-    // 存储用户在线状态的全局缓存
-    private static final Map<Long, String> userOnlineStatus = new ConcurrentHashMap<>();
+    private UserStatusService userStatusService;
 
-    @GetMapping("/api/user/status")
-    public Map<String, Object> getUserStatus(@RequestParam Long userId) {
-        Map<String, Object> status = new ConcurrentHashMap<>();
-        status.put("online", userOnlineStatus.getOrDefault(userId, "OFFLINE"));
-        status.put("chatWithUserId", userChatStatus.get(userId));
-        return status;
+    private static final Map<Long, Long> userChattingWith = new ConcurrentHashMap<>();
+
+    @GetMapping("/status")
+    public ApiResponse getUserStatus(@RequestParam Long userId) {
+        try {
+            Map<String, Object> status = new HashMap<>();
+
+            boolean online = userStatusService.isUserOnline(userId);
+            status.put("online", online);
+
+            Set<Long> chatUsers = userStatusService.getChattingUsers(userId);
+            if (chatUsers != null) {
+                status.put("chattingWith", chatUsers);
+            } else {
+                status.put("chattingWith", java.util.Collections.emptySet());
+            }
+
+            return ApiResponse.success(status);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> fallback = new HashMap<>();
+            fallback.put("online", false);
+            fallback.put("chattingWith", java.util.Collections.emptySet());
+            return ApiResponse.success(fallback);
+        }
     }
-    
-    @GetMapping("/api/user/chat-status")
-    public Map<String, Object> getChatStatus(@RequestParam Long userId, @RequestParam Long targetUserId) {
-        Map<String, Object> status = new ConcurrentHashMap<>();
-        status.put("isChattingWithMe", userChatStatus.getOrDefault(targetUserId, 0L).equals(userId));
-        status.put("targetOnlineStatus", userOnlineStatus.getOrDefault(targetUserId, "OFFLINE"));
-        return status;
+
+    @PostMapping("/status/heartbeat")
+    public ApiResponse heartbeat(@RequestParam Long userId) {
+        try {
+            userStatusService.updateHeartbeat(userId);
+            return ApiResponse.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.success(true);
+        }
     }
-    
-    // 提供给WebSocketController调用的方法
+
     public static void updateUserStatus(Long userId, String status, Long chatWithUserId) {
-        userOnlineStatus.put(userId, status);
-        if (chatWithUserId != null) {
-            userChatStatus.put(userId, chatWithUserId);
-        } else {
-            userChatStatus.remove(userId);
+        if ("ONLINE".equals(status)) {
+            userChattingWith.put(userId, chatWithUserId);
+        } else if ("OFFLINE".equals(status)) {
+            userChattingWith.remove(userId);
         }
     }
 }

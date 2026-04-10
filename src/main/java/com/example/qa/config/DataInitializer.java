@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+// 数据初始化组件
 @Component
 public class DataInitializer implements CommandLineRunner {
     

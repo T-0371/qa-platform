@@ -1435,59 +1435,24 @@
         }
         
         async function loadStats() {
-            console.log('🚀 开始加载统计数据...');
-
+            console.log('开始加载统计数据...');
             try {
-                console.log('📊 加载问题数据...');
+                console.log('加载问题数据...');
                 const questionsResponse = await fetch(API_BASE_URL + '/questions?page=1&size=10');
-
-                if (!questionsResponse.ok) {
-                    throw new Error('HTTP错误! 状态码: ' + questionsResponse.status);
-                }
-
                 const questionsData = await questionsResponse.json();
-                console.log('✅ 问题数据响应:', questionsData);
-
-                if (questionsData.code == 200 && questionsData.data) {
-                    let count = 0;
-
-                    if (typeof questionsData.data === 'object' && !Array.isArray(questionsData.data)) {
-                        count = questionsData.data.total ||
-                               questionsData.data.count ||
-                               (questionsData.data.records ? questionsData.data.records.length : 0) ||
-                               0;
-                    } else if (Array.isArray(questionsData.data)) {
-                        count = questionsData.data.length;
-                    }
-
-                    const countEl = document.getElementById('questionsCount');
-                    const cardEl = document.getElementById('questionsCard');
-
-                    if (countEl) {
-                        countEl.textContent = count;
-                    }
-
-                    if (cardEl) {
-                        cardEl.classList.remove('stat-loading');
-                        cardEl.classList.add('stat-loaded');
-                    }
-
-                    console.log('✅ 问题数量已更新:', count);
+                console.log('问题数据响应:', questionsData);
+                
+                if (questionsData.code == 200) {
+                    const count = questionsData.data.total || questionsData.data.length || 0;
+                    document.getElementById('questionsCount').textContent = count;
+                    document.getElementById('questionsCard').classList.remove('stat-loading');
+                    document.getElementById('questionsCard').classList.add('stat-loaded');
+                    console.log('问题数量已更新:', count);
                 } else {
-                    console.error('❌ 加载问题数据失败：', questionsData.message || '未知错误');
-                    const countEl = document.getElementById('questionsCount');
-                    if (countEl) {
-                        countEl.textContent = '--';
-                        countEl.style.color = '#ef4444';
-                    }
+                    console.error('加载问题数据失败：', questionsData.message);
                 }
             } catch (error) {
-                console.error('❌ 加载问题数据异常：', error);
-                const countEl = document.getElementById('questionsCount');
-                if (countEl) {
-                    countEl.textContent = '--';
-                    countEl.style.color = '#ef4444';
-                }
+                console.error('加载问题数据失败：', error);
             }
             
             try {

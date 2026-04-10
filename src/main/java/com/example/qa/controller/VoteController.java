@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 
 @RestController
-@RequestMapping("/votes")
+@RequestMapping("/api/votes")
 public class VoteController {
 
     @Autowired

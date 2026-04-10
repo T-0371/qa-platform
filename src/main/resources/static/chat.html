@@ -53,6 +53,7 @@
         .sidebar-header {
             padding: 20px;
             border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            position: relative;
         }
         
         .sidebar-header h2 {
@@ -99,6 +100,7 @@
             font-weight: 600;
             font-size: 16px;
             color: white;
+            position: relative;
         }
         
         .user-info {
@@ -121,6 +123,38 @@
             justify-content: center;
             font-size: 12px;
             font-weight: 600;
+        }
+        
+        .user-avatar.online {
+            box-shadow: 0 0 0 2px #22c55e;
+        }
+        
+        .user-avatar.online::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: #22c55e;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        .user-last-msg {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 150px;
+        }
+        
+        .user-last-time {
+            font-size: 11px;
+            color: #9ca3af;
+            white-space: nowrap;
         }
         
         .chat-main {
@@ -275,17 +309,18 @@
         }
         
         .connection-status {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
             z-index: 1000;
-            cursor: move;
+            cursor: default;
             user-select: none;
-            transition: background 0.3s ease, color 0.3s ease, border 0.3s ease;
+            transition: all 0.3s ease;
+            text-align: center;
         }
         
         .connection-status:hover {
@@ -349,14 +384,16 @@
         }
         
         .back-button {
-            padding: 8px 16px;
-            background: rgba(236, 72, 153, 0.2);
-            border: 1px solid rgba(236, 72, 153, 0.3);
-            border-radius: 6px;
-            color: #e8eaed;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            border: none;
+            border-radius: 8px;
+            color: white;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
         }
         
         .mobile-menu-btn {
@@ -422,233 +459,333 @@
         }
 
         @media (max-width: 768px) {
-            body {
-                background: #f5f5f5;
-                overflow: hidden;
+            html, body {
+                background: #f5f5f5 !important;
+                overflow: hidden !important;
+                height: 100vh !important;
+                width: 100vw !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-size: 14px;
             }
-            
-            .container {
-                padding: 0;
-                height: 100vh;
-                margin-top: 0;
+
+            #messageContainer {
+                display: none !important;
             }
             
             .back-buttons {
-                margin-bottom: 0;
-                padding: 10px 15px;
-                background: linear-gradient(135deg, #8b5cf6, #6366f1);
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                z-index: 1000;
-                height: 60px;
+                margin: 0 !important;
+                padding: 10px 15px !important;
+                background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 9999 !important;
+                height: 56px !important;
+                width: 100vw !important;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+                box-sizing: border-box !important;
+                flex-shrink: 0 !important;
             }
             
             .back-button {
-                background: rgba(255, 255, 255, 0.2);
-                border: none;
-                color: white;
-                padding: 8px 16px;
-                border-radius: 20px;
-                z-index: 1001;
+                background: rgba(255, 255, 255, 0.25) !important;
+                border: none !important;
+                color: white !important;
+                padding: 8px 16px !important;
+                border-radius: 20px !important;
+                z-index: 10000 !important;
+                font-weight: 600 !important;
+                font-size: 13px !important;
+                backdrop-filter: blur(4px) !important;
             }
             
             .mobile-menu-btn {
                 display: block !important;
-                z-index: 1001;
+                z-index: 10000 !important;
             }
             
             .connection-status {
-                position: fixed;
-                top: 70px;
-                left: 10px;
-                right: auto;
-                font-size: 12px;
-                padding: 5px 10px;
-                z-index: 1000;
+                position: absolute !important;
+                top: 6px !important;
+                right: 10px !important;
+                font-size: 11px !important;
+                padding: 4px 10px !important;
+                z-index: 10000 !important;
+                text-align: center !important;
+            }
+            
+            .container {
+                padding: 0 !important;
+                height: calc(100vh - 56px) !important;
+                margin: 0 !important;
+                overflow: hidden !important;
+                background: #f5f5f5 !important;
+                position: fixed !important;
+                top: 56px !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                display: block !important;
+                box-sizing: border-box !important;
             }
             
             .chat-container {
-                border-radius: 0;
-                border: none;
-                height: 100vh;
-                position: relative;
-                margin-top: 60px;
+                border-radius: 0 !important;
+                border: none !important;
+                height: 100% !important;
+                width: 100% !important;
+                position: relative !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                overflow: hidden !important;
+                background: #f5f5f5 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: flex !important;
+                flex-direction: row !important;
             }
             
             .sidebar {
-                position: fixed;
-                top: 60px;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                width: 100%;
-                max-height: none;
-                height: calc(100vh - 60px);
-                z-index: 10;
-                background: #f5f5f5;
-                transition: transform 0.3s ease;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100% !important;
+                max-height: none !important;
+                height: 100% !important;
+                z-index: 20 !important;
+                background: #ffffff !important;
+                transition: transform 0.3s ease !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                display: flex !important;
+                flex-direction: column !important;
             }
             
             .sidebar.hidden-mobile {
-                transform: translateX(-100%);
+                transform: translateX(-100%) !important;
+                pointer-events: none;
+            }
+            
+            .sidebar:not(.hidden-mobile) {
+                transform: translateX(0) !important;
+                pointer-events: auto;
             }
             
             .sidebar-header {
-                background: linear-gradient(135deg, #8b5cf6, #6366f1);
-                color: white;
-                padding: 15px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                position: sticky;
-                top: 0;
-                z-index: 1;
+                background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+                color: white !important;
+                padding: 12px 15px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                position: relative !important;
+                top: auto !important;
+                z-index: 1 !important;
+                flex-shrink: 0 !important;
+                margin: 0 !important;
+                min-height: 44px !important;
+                box-sizing: border-box !important;
             }
             
             .sidebar-header h2 {
-                color: white;
-                font-size: 18px;
+                color: white !important;
+                font-size: 18px !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
             .user-list {
-                padding: 10px;
-                background: white;
-                min-height: calc(100% - 60px);
+                padding: 10px !important;
+                background: white !important;
+                flex: 1 1 auto !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                min-height: 0 !important;
             }
             
             .user-item {
-                padding: 15px;
-                background: white;
-                border-radius: 10px;
-                margin-bottom: 10px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                z-index: 1;
-                position: relative;
+                padding: 15px !important;
+                background: white !important;
+                border-radius: 10px !important;
+                margin-bottom: 10px !important;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+                z-index: 1 !important;
+                position: relative !important;
             }
             
             .user-item.active {
-                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.1));
-                border: 2px solid #8b5cf6;
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.1)) !important;
+                border: 2px solid #8b5cf6 !important;
             }
             
             .chat-main {
-                position: fixed;
-                top: 60px;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                width: 100%;
-                height: calc(100vh - 60px);
-                z-index: 5;
-                background: #f5f5f5;
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
-                display: flex;
-                flex-direction: column;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                z-index: 15 !important;
+                background: #f5f5f5 !important;
+                transform: translateX(100%) !important;
+                transition: transform 0.3s ease !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
             }
             
             .chat-main.show-mobile {
-                transform: translateX(0);
+                transform: translateX(0) !important;
+                z-index: 25 !important;
             }
             
             .chat-header {
-                background: linear-gradient(135deg, #8b5cf6, #6366f1);
-                color: white;
-                padding: 15px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                position: sticky;
-                top: 0;
-                z-index: 1;
+                background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+                color: white !important;
+                padding: 12px 15px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                position: relative !important;
+                top: auto !important;
+                z-index: 1 !important;
+                flex-shrink: 0 !important;
+                margin: 0 !important;
+                min-height: 44px !important;
+                max-height: 60px !important;
+                box-sizing: border-box !important;
             }
             
             .chat-header h3 {
-                color: white;
-                font-size: 18px;
+                color: white !important;
+                font-size: 16px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 50%;
             }
             
             .chat-status {
-                color: rgba(255,255,255,0.8);
+                color: rgba(255,255,255,0.8) !important;
+                font-size: 12px !important;
             }
             
             .user-points {
-                background: rgba(255,255,255,0.2);
-                padding: 5px 12px;
-                border-radius: 15px;
+                background: rgba(255,255,255,0.2) !important;
+                padding: 4px 10px !important;
+                border-radius: 15px !important;
+                font-size: 11px !important;
             }
             
             .mobile-back-btn {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                background: rgba(255,255,255,0.2);
-                border: none;
-                color: white;
-                padding: 8px 12px;
-                border-radius: 20px;
-                cursor: pointer;
-                font-size: 14px;
-                z-index: 1;
+                display: flex !important;
+                align-items: center !important;
+                gap: 5px !important;
+                background: rgba(255,255,255,0.2) !important;
+                border: none !important;
+                color: white !important;
+                padding: 8px 12px !important;
+                border-radius: 20px !important;
+                cursor: pointer !important;
+                font-size: 14px !important;
+                z-index: 1 !important;
             }
             
             .messages-container {
-                background: #f5f5f5;
-                padding: 15px;
-                flex: 1;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
+                background: #f5f5f5 !important;
+                padding: 12px !important;
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                position: relative !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
             
             .message {
-                max-width: 80%;
-                margin-bottom: 10px;
+                max-width: 80% !important;
+                margin-bottom: 10px !important;
             }
             
             .message.sent {
-                background: linear-gradient(135deg, #8b5cf6, #6366f1);
+                background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
             }
             
             .message.received {
-                background: white;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                background: white !important;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
             }
             
             .message-input-container {
-                background: white;
-                padding: 10px 15px;
-                display: flex;
-                gap: 10px;
-                align-items: flex-end;
-                position: sticky;
-                bottom: 0;
-                z-index: 1;
+                background: white !important;
+                padding: 10px 12px !important;
+                display: flex !important;
+                gap: 8px !important;
+                align-items: flex-end !important;
+                flex-shrink: 0 !important;
+                z-index: 50 !important;
+                border-top: 1px solid #e5e7eb !important;
+                min-height: 52px !important;
+                position: relative !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                order: 3 !important;
+            }
+            
+            .message-input-container.hidden {
+                display: none !important;
             }
             
             .message-input {
-                border-radius: 20px;
-                padding: 10px 15px;
+                flex: 1 1 auto !important;
+                min-width: 0 !important;
+                padding: 10px 15px !important;
+                font-size: 14px !important;
+                border: 1px solid rgba(139, 92, 246, 0.3) !important;
+                border-radius: 20px !important;
+                background: white !important;
+                resize: none !important;
+                outline: none !important;
+                max-height: 80px !important;
+                line-height: 1.4 !important;
             }
             
             .send-button {
-                border-radius: 20px;
-                padding: 10px 20px;
-                min-width: 60px;
-                z-index: 1;
+                border-radius: 20px !important;
+                padding: 10px 18px !important;
+                min-width: 56px !important;
+                font-size: 14px !important;
+                background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+                border: none !important;
+                color: white !important;
+                font-weight: 600 !important;
+                cursor: pointer !important;
+                flex-shrink: 0 !important;
+                z-index: 50 !important;
             }
             
             .empty-state {
-                background: white;
-                border-radius: 10px;
-                margin: 20px;
-                padding: 40px;
+                background: white !important;
+                border-radius: 10px !important;
+                margin: 20px !important;
+                padding: 40px !important;
             }
         }
 
@@ -706,17 +843,41 @@
             }
             
             .message-input-container {
-                padding: 8px 10px;
+                padding: 8px 10px !important;
+                display: flex !important;
+                gap: 8px !important;
+                align-items: flex-end !important;
+                flex-shrink: 0 !important;
+                background: white !important;
+                border-top: 1px solid #e5e7eb !important;
+                z-index: 10 !important;
+                min-height: 52px !important;
+                position: relative !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
             
             .message-input {
-                padding: 8px 12px;
+                flex: 1;
+                padding: 10px 15px;
                 font-size: 14px;
+                border: 1px solid rgba(139, 92, 246, 0.3);
+                border-radius: 20px;
+                background: white;
+                resize: none;
+                outline: none;
             }
-            
+
             .send-button {
-                padding: 8px 15px;
+                padding: 10px 20px;
                 font-size: 14px;
+                background: linear-gradient(135deg, #8b5cf6, #6366f1);
+                border: none;
+                border-radius: 20px;
+                color: white;
+                font-weight: 600;
+                cursor: pointer;
+                flex-shrink: 0;
             }
             
             .user-points {
@@ -731,21 +892,23 @@
     </style>
 </head>
 <body>
+    
     <div id="messageContainer" class="message-container"></div>
     
-    <div class="back-buttons">
-        <button class="back-button mobile-menu-btn" onclick="toggleSidebar()">☰ 菜单</button>
+    
+    <div class="back-buttons">        
         <button class="back-button" onclick="goToHome()">返回首页</button>
         <button class="back-button hidden" id="backToQuestionBtn" onclick="goToQuestion()">返回问题页</button>
     </div>
     
-    <div class="connection-status" id="connectionStatus">
-        连接中...
-    </div>
+   
     
     <div class="container">
-        <div class="chat-container">
-            <div class="sidebar">
+        <div class="chat-container">     
+            <div class="connection-status" id="connectionStatus">
+                    连接中...
+                </div>         
+            <div class="sidebar">                
                 <div class="sidebar-header">
                     <h2>聊天列表</h2>
                 </div>
@@ -770,7 +933,7 @@
                     </div>
                 </div>
                 
-                <div class="message-input-container hidden" id="inputContainer">
+                <div class="message-input-container" id="inputContainer">
                     <textarea class="message-input" id="messageInput" placeholder="输入消息..." rows="1"></textarea>
                     <button class="send-button" onclick="sendMessage()">发送</button>
                 </div>
@@ -778,7 +941,7 @@
         </div>
     </div>
 
-    <script src="/js/common.js"></script>
+    <script src="/js/common.js?v=202604070600"></script>
     <script>
         // 添加一个本地消息跟踪映射，用于通过ID更新消息状态
         let pendingMessages = new Map();
@@ -792,11 +955,50 @@
         let currentInitiatorId = null; // 当前聊天通道的最新创建者ID（当前用户）
         let userOnlineStatus = new Map(); // 存储用户在线状态
         let userChatStatus = new Map(); // 存储用户是否在聊天页面
+        let wsStatusCache = new Map(); // 存储WebSocket接收到的状态和时间戳（用于防止轮询覆盖）
         let conversationStatus = new Map(); // 存储每个对话的状态
         let pointsActionTimes = new Map(); // 存储积分操作时间，避免重复处理
         let statusPollingInterval = null; // 状态轮询定时器
 
         let isProcessingPoints = false; // 防止重复积分操作
+        let isInitialized = false; // 防止重复初始化
+        let isWebSocketConnecting = false; // 防止WebSocket重复连接
+        let webSocketReconnectAttempts = 0; // WebSocket重连次数
+        let activeChatUserId = null; // 当前正在持续聊天的用户ID（防止重复触发进入判断）
+        
+        // 全局初始化状态管理
+        window.chatPageInitState = window.chatPageInitState || { initialized: false, completing: false };
+        
+        // 全局API调用防抖管理
+        window.__apiCallTracker = window.__apiCallTracker || {};
+        
+        // 全局统一数据刷新锁 - 防止所有路径的重复加载
+        window.__chatRefreshLock = {
+            isRefreshing: false,
+            lastRefreshTime: 0,
+            MIN_REFRESH_INTERVAL: 3000,
+            acquire: function() {
+                var now = Date.now();
+                if (this.isRefreshing || (now - this.lastRefreshTime < this.MIN_REFRESH_INTERVAL)) {
+                    return false;
+                }
+                this.isRefreshing = true;
+                this.lastRefreshTime = now;
+                return true;
+            },
+            release: function() {
+                this.isRefreshing = false;
+            }
+        };
+        // 广播消息加载时间戳（全局，不受WebSocket重连影响）
+        window.__lastBroadcastLoadTime = 0;
+        
+        // 页面可见性变化处理（从bfcache恢复等）
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && window.chatPageInitState.initialized) {
+                console.log('页面恢复可见，初始化已完成');
+            }
+        });
         
         // 页面加载时获取当前用户信息
         async function initCurrentUser() {
@@ -828,7 +1030,7 @@
                 
                 // 如果有userId，从API获取用户信息
                 if (userId) {
-                    const response = await fetch('/users/me?userId=' + userId);
+                    const response = await fetch('/api/users/me?userId=' + userId);
                     const data = await response.json();
                     if (data.code === 200 && data.data) {
                         currentUser = data.data;
@@ -844,7 +1046,7 @@
         // 加载用户积分
         async function loadUserPoints() {
             try {
-                const response = await fetch(`/messages/user/points?userId=${currentUser.id}`);
+                const response = await fetch(`/api/messages/user/points?userId=${currentUser.id}`);
                 const data = await response.json();
                 if (data.code === 200) {
                     const points = data.data.points;
@@ -887,52 +1089,63 @@
         }
         
         async function init() {
+            // 多重保护，防止重复初始化
+            if (isInitialized) {
+                console.log('保护1: 已初始化，跳过');
+                return;
+            }
+            if (window.chatPageInitState && window.chatPageInitState.initialized) {
+                console.log('保护2: 已初始化，跳过');
+                return;
+            }
+            if (window.chatPageInitState && window.chatPageInitState.initInProgress) {
+                console.log('保护3: 初始化进行中，跳过');
+                return;
+            }
+            
+            // 标记开始初始化
+            if (window.chatPageInitState) {
+                window.chatPageInitState.initInProgress = true;
+            }
+            isInitialized = true;
             console.log('开始初始化聊天页面...');
             
-            // 并行初始化操作，提高加载速度
-            const initPromises = [];
-            
-            // 1. 初始化当前用户
-            const userInitPromise = initCurrentUser().then(() => {
+            try {
+                await initCurrentUser();
+                
                 if (!currentUser) {
                     showMessage('请先登录', 'error');
                     setTimeout(function() {
                         window.location.href = '/login.html';
                     }, 1500);
-                    throw new Error('用户未登录');
+                    return;
                 }
-            });
-            initPromises.push(userInitPromise);
-            
-            // 2. 解析URL参数
-            const urlParams = new URLSearchParams(window.location.search);
-            selectedUserId = urlParams.get('userId');
-            questionId = getQuestionIdFromUrl();
-            
-            console.log('URL参数解析:', {
-                selectedUserId: selectedUserId,
-                questionId: questionId
-            });
-            
-            if (questionId) {
-                document.getElementById('backToQuestionBtn').classList.remove('hidden');
-            }
-            
-            try {
-                // 等待用户初始化完成
-                await userInitPromise;
                 
-                // 3. 并行执行其他初始化操作
-                await Promise.all([
-                    connectWebSocket(),
-                    loadUsers(),
-                    loadRecentConversations(),
-                    typeof loadSystemConfig === 'function' ? loadSystemConfig() : Promise.resolve()
-                ]);
+                selectedUserId = new URLSearchParams(window.location.search).get('userId');
+                questionId = getQuestionIdFromUrl();
                 
+                if (questionId) {
+                    document.getElementById('backToQuestionBtn').classList.remove('hidden');
+                }
+                
+                // 分别执行，不因为一个失败而阻止其他
+                connectWebSocket().catch(err => console.error('WebSocket连接失败:', err));
+                loadUsers().catch(err => console.error('加载用户失败:', err));
+                loadRecentConversations().catch(err => console.error('加载会话失败:', err));
+                
+                // 标记初始化完成
+                if (window.chatPageInitState) {
+                    window.chatPageInitState.initialized = true;
+                    window.chatPageInitState.initInProgress = false;
+                }
                 console.log('聊天页面初始化完成');
             } catch (error) {
                 console.error('初始化失败:', error);
+                // 重置状态，允许重试
+                isInitialized = false;
+                if (window.chatPageInitState) {
+                    window.chatPageInitState.initInProgress = false;
+                }
             }
         }
         
@@ -954,6 +1167,19 @@
         }
         
         function connectWebSocket() {
+            if (isWebSocketConnecting) {
+                console.log('WebSocket正在连接中，跳过重复连接');
+                return Promise.resolve();
+            }
+            
+            if (webSocketReconnectAttempts > 10) {
+                console.error('WebSocket重连次数过多，停止重连');
+                updateConnectionStatus(false);
+                return Promise.reject(new Error('WebSocket重连次数过多'));
+            }
+            
+            isWebSocketConnecting = true;
+            
             return new Promise((resolve, reject) => {
                 console.log('开始连接WebSocket...');
                 console.log('当前用户状态:', currentUser);
@@ -963,24 +1189,34 @@
                 if (!currentUser || !currentUser.id) {
                     console.error('用户未初始化，无法连接WebSocket');
                     updateConnectionStatus(false);
+                    isWebSocketConnecting = false;
                     reject(new Error('用户未初始化'));
                     return;
                 }
                 
                 try {
                     console.log('当前用户:', currentUser);
+                    // 检测是否为平板或移动设备
+                    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
+                    var sockTimeout = isMobile ? 10000 : 5000;
+                    
+                    var transports = ['websocket', 'xhr-streaming', 'xhr-polling'];
+                    if (isMobile) {
+                        transports = ['websocket', 'xhr-streaming', 'xhr-polling', 'iframe-eventsource', 'iframe-htmlfile'];
+                    }
+                    
                     const socket = new SockJS('/ws?userId=' + currentUser.id, null, {
-                        timeout: 5000, // 缩短超时时间
-                        transports: ['websocket', 'xhr-streaming', 'xhr-polling'] // 优先使用websocket
+                        timeout: sockTimeout,
+                        transports: transports
                     });
                     console.log('SockJS创建成功:', socket);
                     stompClient = Stomp.over(socket);
                     console.log('Stomp客户端创建成功:', stompClient);
                     
-                    // 优化STOMP配置
-                    stompClient.heartbeat.outgoing = 10000; // 每10秒发送一次心跳
-                    stompClient.heartbeat.incoming = 15000; // 每15秒接收一次心跳
-                    stompClient.reconnect_delay = 2000; // 重连延迟2秒
+                    // 优化STOMP配置（移动端/平板使用更长心跳间隔）
+                    stompClient.heartbeat.outgoing = isMobile ? 15000 : 10000;
+                    stompClient.heartbeat.incoming = isMobile ? 25000 : 15000;
+                    stompClient.reconnect_delay = isMobile ? 5000 : 2000;
                     stompClient.debug = function(str) {
                         // 只输出错误信息，减少控制台噪音
                         if (str.indexOf('error') !== -1 || str.indexOf('Error') !== -1) {
@@ -994,6 +1230,7 @@
                     // 设置连接超时
                     const connectTimeout = setTimeout(() => {
                         console.error('WebSocket连接超时');
+                        isWebSocketConnecting = false;
                         updateConnectionStatus(false);
                         reject(new Error('连接超时'));
                     }, 8000);
@@ -1004,6 +1241,8 @@
                             clearTimeout(connectTimeout);
                             console.log('WebSocket连接成功:', frame);
                             isConnected = true;
+                            isWebSocketConnecting = false;
+                            webSocketReconnectAttempts = 0;
                             updateConnectionStatus(true);
                             
                             // 加载用户在线状态
@@ -1015,30 +1254,44 @@
                             // 发送在线状态
                             sendUserStatus('ONLINE', selectedUserId);
                             
-                            // 只订阅用户特定的消息队列，避免消息重复接收
-                            const messageSubscription = stompClient.subscribe('/user/queue/messages', function(message) {
-                                try {
-                                    const chatMessage = JSON.parse(message.body);
-                                    console.log('收到私有消息:', chatMessage);
-                                    handleIncomingMessage(chatMessage);
-                                } catch (error) {
-                                    console.error('解析消息失败:', error);
-                                }
-                            });
-                            
-                            // 订阅广播消息，用于系统通知等
-                            const broadcastSubscription = stompClient.subscribe('/topic/messages', function(message) {
-                                try {
-                                    const chatMessage = JSON.parse(message.body);
-                                    console.log('收到广播消息:', chatMessage);
-                                    // 只处理系统通知，不处理聊天消息
-                                    if (chatMessage.type === 'CONFIG_UPDATE') {
-                                        handleIncomingMessage(chatMessage);
-                                    }
-                                } catch (error) {
-                                    console.error('解析广播消息失败:', error);
-                                }
-                            });
+                            // 订阅用户特定的消息队列（唯一负责显示聊天消息的通道）
+            const messageSubscription = stompClient.subscribe('/user/queue/messages', function(message) {
+                try {
+                    const chatMessage = JSON.parse(message.body);
+                    console.log('收到私有消息:', chatMessage);
+                    handleIncomingMessage(chatMessage);
+                } catch (error) {
+                    console.error('解析消息失败:', error);
+                }
+            });
+            
+            // 订阅广播消息，仅用于触发列表刷新和系统通知（不用于显示聊天消息）
+            // 聊天消息的显示完全由私有队列 /user/queue/messages 处理，避免重复
+            const broadcastSubscription = stompClient.subscribe('/topic/messages', function(message) {
+                try {
+                    const chatMessage = JSON.parse(message.body);
+                    console.log('收到广播消息:', chatMessage);
+
+                    // 如果是配置更新通知，正常处理
+                    if (chatMessage.type === 'CONFIG_UPDATE') {
+                        handleIncomingMessage(chatMessage);
+                        return;
+                    }
+
+                    // 如果是已读通知，直接忽略
+                    if (chatMessage.content === '__READ__') {
+                        return;
+                    }
+
+                    // 广播消息不再调用handleIncomingMessage显示消息内容
+                    // 消息显示和列表更新已由私有队列(/user/queue/messages)统一处理
+                    // 广播消息仅用于极少量必要的场景（如新用户开始聊天通知）
+                    // 为避免屏幕刷屏，完全不触发任何UI刷新
+                    console.log('广播消息收到(静默处理，不刷新UI):', chatMessage.type || '未知类型');
+                } catch (error) {
+                    console.error('解析广播消息失败:', error);
+                }
+            });
                             
                             // 订阅用户状态消息
                             const statusSubscription = stompClient.subscribe('/topic/status', function(message) {
@@ -1062,17 +1315,25 @@
                             clearTimeout(connectTimeout);
                             console.error('WebSocket连接失败:', error);
                             isConnected = false;
+                            isWebSocketConnecting = false;
+                            webSocketReconnectAttempts++;
                             updateConnectionStatus(false);
-                            // 立即重试连接
-                            setTimeout(connectWebSocket, 2000);
+                            // 限制重连间隔，避免频繁重连
+                            if (webSocketReconnectAttempts <= 10) {
+                                setTimeout(connectWebSocket, Math.min(5000, 2000 * webSocketReconnectAttempts));
+                            }
                             reject(error);
                         });
                 } catch (error) {
                     console.error('WebSocket连接异常:', error);
                     isConnected = false;
+                    isWebSocketConnecting = false;
+                    webSocketReconnectAttempts++;
                     updateConnectionStatus(false);
-                    // 立即重试连接
-                    setTimeout(connectWebSocket, 2000);
+                    // 限制重连间隔，避免频繁重连
+                    if (webSocketReconnectAttempts <= 10) {
+                        setTimeout(connectWebSocket, Math.min(5000, 2000 * webSocketReconnectAttempts));
+                    }
                     reject(error);
                 }
             });
@@ -1114,14 +1375,24 @@
             if (!statusMessage || !statusMessage.userId) return;
             
             console.log('收到用户状态消息:', statusMessage);
-            
+
             // 更新用户在线状态
             userOnlineStatus.set(statusMessage.userId, statusMessage.status);
-            
-            // 更新用户聊天状态
+
+            // 缓存WebSocket接收到的状态（用于防止轮询覆盖）
+            wsStatusCache.set(statusMessage.userId, {
+                status: statusMessage.status,
+                timestamp: Date.now(),
+                chatWithUserId: statusMessage.chatWithUserId || null
+            });
+            console.log('💾 缓存WebSocket状态:', statusMessage.userId, statusMessage.status);
+
+            // 更新用户聊天状态（关键修复：只有真正离线时才删除聊天状态）
             if (statusMessage.chatWithUserId) {
                 userChatStatus.set(statusMessage.userId, statusMessage.chatWithUserId);
-            } else if (statusMessage.status === 'OFFLINE' || statusMessage.status === 'AWAY') {
+            } else if (statusMessage.status === 'OFFLINE') {
+                // 只有明确离线时才删除聊天状态
+                // AWAY状态时不删除，因为用户可能只是暂时离开屏幕或切换了聊天窗口
                 userChatStatus.delete(statusMessage.userId);
             }
             
@@ -1129,77 +1400,125 @@
             updateUserStatusUI();
         }
         
-        // 更新用户状态UI
+        // 更新用户状态UI（参考QQ/微信显示逻辑）
         function updateUserStatusUI() {
-            // 更新用户列表中在线状态
             document.querySelectorAll('.user-item').forEach(item => {
                 const userId = parseInt(item.getAttribute('data-user-id'));
-                const statusElement = item.querySelector('.user-status');
-                if (statusElement) {
-                    const status = userOnlineStatus.get(userId);
+                const avatarEl = item.querySelector('.user-avatar');
+                const status = userOnlineStatus.get(userId);
+                if (avatarEl) {
                     if (status === 'ONLINE') {
-                        statusElement.className = 'user-status online';
-                        statusElement.textContent = '在线';
-                        // 添加在线状态动画
-                        statusElement.classList.add('status-animation');
-                        setTimeout(() => statusElement.classList.remove('status-animation'), 1000);
-                    } else if (status === 'AWAY') {
-                        statusElement.className = 'user-status away';
-                        statusElement.textContent = '离开';
+                        avatarEl.classList.add('online');
                     } else {
-                        statusElement.className = 'user-status offline';
-                        statusElement.textContent = '离线';
+                        avatarEl.classList.remove('online');
                     }
                 }
             });
             
-            // 更新聊天界面顶部的用户状态
-            if (selectedUserId) {
-                const chatStatusEl = document.getElementById('chatStatus');
-                if (chatStatusEl) {
-                    const status = userOnlineStatus.get(selectedUserId);
-                    const newStatusText = status === 'ONLINE' ? '在线' : (status === 'AWAY' ? '离开' : '离线');
-                    
-                    // 只有当状态变化时才更新，避免不必要的DOM操作
-                    if (chatStatusEl.textContent !== newStatusText) {
-                        chatStatusEl.textContent = newStatusText;
-                        // 添加状态变化动画
-                        chatStatusEl.classList.add('status-animation');
-                        setTimeout(() => chatStatusEl.classList.remove('status-animation'), 1000);
+            const chatStatusEl = document.getElementById('chatStatus');
+            if (chatStatusEl && selectedUserId) {
+                var newStatusText = '';
+                var newStatusClass = 'chat-status';
+                
+                const chatWithUser = userChatStatus.get(selectedUserId);
+                // 优先显示"正在与您聊天"（对方当前正在与自己聊天）
+                if (chatWithUser && chatWithUser == currentUser.id) {
+                    newStatusText = '正在与您聊天';
+                    newStatusClass = 'chat-status online';
+                } else {
+                    const onlineStatus = userOnlineStatus.get(selectedUserId);
+                    // 防御性判断：优先级 ONLINE > AWAY > 未知(默认在线) > 其他(离线)
+                    if (onlineStatus === 'ONLINE') {
+                        newStatusText = '在线';
+                        newStatusClass = 'chat-status online';
+                    } else if (onlineStatus === 'AWAY') {
+                        newStatusText = '离开';
+                        newStatusClass = 'chat-status away';
+                    } else if (!onlineStatus) {
+                        // 从未收到过该用户的状态消息，默认显示在线（更友好的用户体验）
+                        newStatusText = '在线';
+                        newStatusClass = 'chat-status online';
+                    } else {
+                        newStatusText = '离线';
+                        newStatusClass = 'chat-status offline';
                     }
                 }
+                
+                if (chatStatusEl.textContent !== newStatusText) {
+                    chatStatusEl.textContent = newStatusText;
+                    chatStatusEl.className = newStatusClass;
+                }
             }
+            
+            // 更新聊天列表中的状态文字
+            document.querySelectorAll('.user-item').forEach(item => {
+                const userId = parseInt(item.getAttribute('data-user-id'));
+                const statusHintEl = item.querySelector('.user-status-hint');
+                if (statusHintEl) {
+                    const status = userOnlineStatus.get(userId);
+                    const chattingWith = userChatStatus.get(userId);
+                    if (chattingWith && chattingWith == currentUser.id) {
+                        statusHintEl.textContent = '正在聊天';
+                        statusHintEl.className = 'user-status-hint chatting';
+                    } else if (status === 'ONLINE') {
+                        statusHintEl.textContent = '在线';
+                        statusHintEl.className = 'user-status-hint online';
+                    } else {
+                        statusHintEl.textContent = '';
+                        statusHintEl.className = 'user-status-hint';
+                    }
+                }
+            });
         }
         
         // 加载用户在线状态
         function loadUserOnlineStatus() {
             console.log('加载用户在线状态...');
-            // 为每个用户获取在线状态
+            if (!allUsers || allUsers.length === 0) {
+                console.log('用户列表为空，跳过状态加载');
+                return;
+            }
+            
+            const promises = [];
             allUsers.forEach(user => {
                 if (user && user.id) {
-                    fetch(`/api/user/status?userId=${user.id}`, {
-                        timeout: 3000
-                    })
+                    promises.push(
+                        fetch(`/api/user/status?userId=${user.id}`, {
+                            timeout: 3000
+                        })
                         .then(response => response.json())
-                        .then(data => {
-                            console.log('用户状态API响应:', user.id, data);
-                            // 无论用户在线还是离线，都更新状态
-                            if (data) {
-                                const status = data.online ? 'ONLINE' : 'OFFLINE';
-                                userOnlineStatus.set(user.id, status);
-                                if (data.chatWithUserId) {
-                                    userChatStatus.set(user.id, data.chatWithUserId);
-                                } else {
-                                    userChatStatus.delete(user.id);
+                        .then(responseData => {
+                            if (responseData && responseData.code === 200 && responseData.data) {
+                                const innerData = responseData.data;
+                                const apiStatus = innerData.online ? 'ONLINE' : 'OFFLINE';
+
+                                // 检查WebSocket缓存中是否有更新的状态（防止轮询覆盖实时数据）
+                                const wsCached = wsStatusCache.get(user.id);
+                                if (wsCached) {
+                                    const cacheAge = Date.now() - wsCached.timestamp;
+                                    // 如果WebSocket在60秒内有更新，优先使用WebSocket状态
+                                    if (cacheAge < 60000) {
+                                        console.log(`⏱️ 用户${user.id}: WebSocket缓存有效(${Math.round(cacheAge/1000)}秒前)，使用WS状态:`, wsCached.status, '而非API状态:', apiStatus);
+                                        userOnlineStatus.set(user.id, wsCached.status);
+                                        return; // 跳过API状态的更新
+                                    }
                                 }
-                                // 立即更新UI
-                                updateUserStatusUI();
+
+                                // 只更新在线状态，不更新聊天状态（避免覆盖WebSocket实时数据）
+                                userOnlineStatus.set(user.id, apiStatus);
+                                // 注意：不再在这里更新或删除userChatStatus
+                                // chatWithUserId只能由WebSocket /topic/status 实时消息更新
                             }
                         })
                         .catch(error => {
                             console.error('加载用户状态失败:', error);
-                        });
+                        })
+                    );
                 }
+            });
+            
+            Promise.all(promises).then(() => {
+                updateUserStatusUI();
             });
         }
         
@@ -1210,11 +1529,11 @@
             if (statusPollingInterval) {
                 clearInterval(statusPollingInterval);
             }
-            // 每3秒轮询一次用户状态，提高实时性
+            // 每15秒轮询一次用户状态（通过WebSocket /topic/status 实时推送，轮询仅作备用）
             statusPollingInterval = setInterval(() => {
                 console.log('定期轮询用户状态...');
                 loadUserOnlineStatus();
-            }, 3000);
+            }, 15000);
         }
         
         // 停止定期轮询用户状态
@@ -1227,19 +1546,25 @@
         }
         
         async function loadUsers() {
+            if (!window.__chatRefreshLock.acquire()) {
+                console.log('loadUsers被防抖拦截，跳过');
+                return;
+            }
+            
             console.log('开始加载用户列表...');
             const currentUserId = currentUser ? currentUser.id : null;
             
             if (!currentUserId) {
                 console.error('用户未登录，无法加载用户列表');
+                window.__chatRefreshLock.release();
                 return;
             }
             
             try {
                 // 并行加载最近聊天记录和所有用户
                 const [recentData, usersData] = await Promise.all([
-                    fetch(`/messages/contacts?userId=${currentUserId}`).then(r => r.json()),
-                    fetch('/users').then(r => r.json())
+                    fetch(`/api/messages/contacts?userId=${currentUserId}`).then(r => r.json()),
+                    fetch('/api/users').then(r => r.json())
                 ]);
                 
                 console.log('最近聊天数据:', recentData);
@@ -1296,43 +1621,50 @@
                     console.log('过滤后的用户列表:', allUsers);
                     renderUserList(allUsers);
                     
-                    // 加载未读消息数量
-                    await loadRecentConversations();
-                    
+                    // 检查URL中是否有目标用户ID
                     const urlParams = new URLSearchParams(window.location.search);
-                    const targetUserId = urlParams.get('userId');
-                    console.log('目标用户ID:', targetUserId);
+                    const targetUserIdStr = urlParams.get('userId');
                     
-                    if (targetUserId) {
-                        const targetUserIdNum = parseInt(targetUserId);
-                        const targetUser = usersData.data.find(u => u.id === targetUserIdNum);
-                        if (targetUser) {
-                            let existsInList = allUsers.find(u => u.id === targetUserIdNum);
-                            if (!existsInList) {
-                                allUsers.unshift({
-                                    id: targetUser.id,
-                                    username: targetUser.username,
-                                    avatar: targetUser.avatar,
+                    // 无论目标用户是否在列表中，都要处理
+                    if (targetUserIdStr) {
+                        const targetUserIdNum = parseInt(targetUserIdStr);
+                        
+                        // 检查用户是否已在allUsers中
+                        let targetUser = allUsers.find(u => u.id === targetUserIdNum);
+                        
+                        // 如果用户不在列表中，从usersData查找完整信息并添加
+                        if (!targetUser && usersData.data) {
+                            const fullUser = usersData.data.find(u => u.id === targetUserIdNum);
+                            if (fullUser) {
+                                targetUser = {
+                                    id: fullUser.id,
+                                    username: fullUser.username,
+                                    avatar: fullUser.avatar,
                                     lastMessage: '',
                                     lastMessageTime: null
-                                });
+                                };
+                                allUsers.unshift(targetUser);
                                 renderUserList(allUsers);
-                                // 重新加载未读消息数量
-                                await loadRecentConversations();
                             }
-                            console.log('准备选择用户:', targetUserId);
-                            selectUser(targetUserIdNum);
+                        }
+                        
+                        if (targetUser) {
+                            console.log('准备选择用户:', targetUserIdNum);
+                            // 延迟一点确保UI已更新
+                            setTimeout(() => selectUser(targetUserIdNum), 100);
                         }
                     }
                 }
             } catch (error) {
                 console.error('加载用户列表失败:', error);
+            } finally {
+                window.__chatRefreshLock.release();
             }
         }
         
         async function loadRecentConversations() {
             try {
-                const response = await fetch(`/messages/contacts?userId=${currentUser.id}`);
+                const response = await fetch(`/api/messages/contacts?userId=${currentUser.id}`);
                 const data = await response.json();
                 console.log('最近聊天数据:', data);
                 if (data.code === 200) {
@@ -1374,21 +1706,54 @@
             console.log('渲染用户列表，用户数:', users.length);
             const userList = document.getElementById('userList');
             userList.innerHTML = users.map(user => {
-                const avatarHtml = user.avatar && user.avatar.startsWith('data:image') 
-                    ? `<img src="${user.avatar}" alt="${user.username}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
-                    : `<span>${user.username.charAt(0).toUpperCase()}</span>`;
+                let avatarHtml;
+                if (user.avatar) {
+                    if (user.avatar.startsWith('data:image')) {
+                        avatarHtml = `<img src="${user.avatar}" alt="${user.username}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                    } else if (user.avatar.startsWith('http') || user.avatar.startsWith('/uploads')) {
+                        avatarHtml = `<img src="${user.avatar}" alt="${user.username}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span>${user.username.charAt(0).toUpperCase()}</span>'">`;
+                    } else {
+                        avatarHtml = `<span>${user.username.charAt(0).toUpperCase()}</span>`;
+                    }
+                } else {
+                    avatarHtml = `<span>${user.username.charAt(0).toUpperCase()}</span>`;
+                }
+                
+                const lastMsg = user.lastMessage ? (user.lastMessage.length > 20 ? user.lastMessage.substring(0, 20) + '...' : user.lastMessage) : '';
+                const lastTime = user.lastMessageTime ? formatChatTime(user.lastMessageTime) : '';
+                const onlineStatus = userOnlineStatus.get(user.id);
+                const statusClass = onlineStatus === 'ONLINE' ? 'online' : '';
+                
                 return `
                 <div class="user-item" data-user-id="${user.id}" onclick="selectUser(${user.id})">
-                    <div class="user-avatar">${avatarHtml}</div>
+                    <div class="user-avatar ${statusClass}">${avatarHtml}</div>
                     <div class="user-info">
                         <div class="user-name">${user.username}</div>
+                        ${lastMsg ? `<div class="user-last-msg">${lastMsg}</div>` : ''}
                     </div>
+                    ${lastTime ? `<div class="user-last-time">${lastTime}</div>` : ''}
                     <div class="unread-badge hidden">0</div>
                 </div>
                 `;
             }).join('');
             
             console.log('用户列表HTML已渲染');
+        }
+        
+        function formatChatTime(timeStr) {
+            if (!timeStr) return '';
+            const date = new Date(timeStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return '刚刚';
+            if (diffMins < 60) return diffMins + '分钟前';
+            if (diffHours < 24) return diffHours + '小时前';
+            if (diffDays < 7) return diffDays + '天前';
+            return date.toLocaleDateString();
         }
         
         // 检查对方是否在与我聊天
@@ -1412,8 +1777,17 @@
         
         async function selectUser(userId) {
             console.log('选择用户:', userId, '类型:', typeof userId);
-            
+
             selectedUserId = userId;
+
+            // 记录聊天窗口打开时间（用于通知过滤）
+            localStorage.setItem('chatOpenTime_' + userId, new Date().toISOString());
+            localStorage.setItem('lastChatUserId', userId);
+            console.log('💾 已记录聊天打开时间 - userId:', userId);
+            
+            // 判断是否为持续聊天（同一用户重复选择），如果是则跳过积分/发起者判断
+            var isContinuousChat = (activeChatUserId === userId);
+            console.log('是否持续聊天:', isContinuousChat, 'activeChatUserId:', activeChatUserId, 'userId:', userId);
             
             document.querySelectorAll('.user-item').forEach(item => {
                 item.classList.remove('active');
@@ -1445,10 +1819,8 @@
                 sendUserStatus('ONLINE', userId);
                 console.log('已发送聊天状态到用户:', userId);
                 
-                // 积分逻辑判断
-                // 1. 如果是第一次选择该用户，根据是否有未读消息判断积分操作
-                // 2. 如果之前已经选择过该用户，切换到其他用户再返回时，根据对方是否还在与我聊天判断积分操作
-                if (currentUser && currentUser.id && !isProcessingPoints) {
+                // 仅在非持续聊天时执行积分/发起者判断逻辑（首次进入或切换用户时）
+                if (!isContinuousChat && currentUser && currentUser.id && !isProcessingPoints) {
                     isProcessingPoints = true; // 设置标志，防止重复处理
                     try {
                         // 检查是否有未读消息
@@ -1517,7 +1889,7 @@
                         if (pointsAction === 'receive') {
                             // 获得积分
                             console.log('执行获得积分逻辑');
-                            const rewardResponse = await fetch(`/messages/receive-contact/${userId}?currentUserId=${currentUser.id}`, {
+                            const rewardResponse = await fetch(`/api/messages/receive-contact/${userId}?currentUserId=${currentUser.id}`, {
                                 method: 'POST'
                             });
                             const rewardData = await rewardResponse.json();
@@ -1558,7 +1930,7 @@
                         } else if (pointsAction === 'deduct') {
                             // 消耗积分
                             console.log('执行消耗积分逻辑');
-                            const deductResponse = await fetch(`/messages/initiate-chat/${currentUser.id}?receiverId=${userId}`, {
+                            const deductResponse = await fetch(`/api/messages/initiate-chat/${currentUser.id}?receiverId=${userId}`, {
                                 method: 'POST'
                             });
                             const deductData = await deductResponse.json();
@@ -1594,6 +1966,7 @@
                 }
                 
                 lastSelectedUserId = userId;
+                activeChatUserId = userId;
                 
                 loadConversation(userId);
                 markMessagesAsRead(userId);
@@ -1607,7 +1980,7 @@
         
         async function checkUnreadMessages(userId) {
             try {
-                const response = await fetch(`/messages/unread-count?userId=${currentUser.id}&senderId=${userId}`);
+                const response = await fetch(`/api/messages/unread-count?userId=${currentUser.id}&senderId=${userId}`);
                 const data = await response.json();
                 console.log('未读消息检查结果:', data);
                 return data.code === 200 && data.data > 0;
@@ -1626,7 +1999,7 @@
             container.innerHTML = '<div class="loading-message">加载中...</div>';
             
             // 使用 fetch 并设置超时
-            fetch(`/messages/conversation/${userId}?currentUserId=${currentUser.id}`, {
+            fetch(`/api/messages/conversation/${userId}?currentUserId=${currentUser.id}`, {
                 timeout: 10000 // 10秒超时
             })
                 .then(response => {
@@ -1673,8 +2046,15 @@
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const content = input.value.trim();
+            const currentSelectedUser = selectedUserId;
             
-            if (!content || !selectedUserId) return;
+            if (!content || !currentSelectedUser) return;
+            
+            if (currentSelectedUser !== activeChatUserId) {
+                console.warn('sendMessage: selectedUserId mismatch! currentSelectedUser:', currentSelectedUser, 'activeChatUserId:', activeChatUserId, '跳过发送');
+                showMessage('请先选择聊天用户', 'error');
+                return;
+            }
             
             // 检查用户是否登录
             if (!currentUser) {
@@ -1688,12 +2068,19 @@
                 return;
             }
             
+            // 防止切换用户后发送消息跳回原用户
+            if (currentSelectedUser !== activeChatUserId) {
+                console.warn('sendMessage: selectedUserId mismatch! currentSelectedUser:', currentSelectedUser, 'activeChatUserId:', activeChatUserId, '跳过发送');
+                showMessage('请先选择聊天用户', 'error');
+                return;
+            }
+            
             // 检查当前用户是最新创建者还是被联系者
             // 最新创建者：最近一次切换用户时成为创建者的人
             // 被联系者：被创建者联系的人
             if (currentInitiatorId === currentUser.id) {
                 // 当前用户是最新创建者，发送消息消耗积分
-                const deductResponse = await fetch(`/messages/send-message?receiverId=${selectedUserId}&senderId=${currentUser.id}`, {
+                const deductResponse = await fetch(`/api/messages/send-message?receiverId=${selectedUserId}&senderId=${currentUser.id}`, {
                     method: 'POST'
                 });
                 const deductData = await deductResponse.json();
@@ -1706,7 +2093,7 @@
                 }
             } else {
                 // 当前用户是被联系者，发送消息获得积分
-                const replyRewardResponse = await fetch(`/messages/reply-reward?senderId=${currentUser.id}&receiverId=${selectedUserId}&currentUserId=${currentUser.id}`, {
+                const replyRewardResponse = await fetch(`/api/messages/reply-reward?senderId=${currentUser.id}&receiverId=${selectedUserId}&currentUserId=${currentUser.id}`, {
                     method: 'POST'
                 });
                 const replyRewardData = await replyRewardResponse.json();
@@ -1829,14 +2216,15 @@
                     const contentElement = msgElement.querySelector('.message-content');
                     const statusElement = msgElement.querySelector('.message-status');
                     
-                    if (contentElement && contentElement.textContent === message.content && 
-                        statusElement && statusElement.textContent === '发送中...') {
+                    if (contentElement && contentElement.textContent === message.content) {
                         if (statusElement) {
                             statusElement.textContent = message.isRead ? '已读' : '已发送';
                         }
-                        msgElement.id = 'message_' + message.id;
+                        if (message.id && !msgElement.id.startsWith('message_')) {
+                            msgElement.id = 'message_' + message.id;
+                        }
                         found = true;
-                        console.log('通过内容匹配更新消息状态成功');
+                        console.log('通过内容匹配更新消息状态成功(宽松匹配)');
                         break;
                     }
                 }
@@ -1869,13 +2257,37 @@
                 // 标记为已读
                 markMessagesAsRead(message.senderId);
             } else {
-                // 其他消息，更新会话列表、未读消息和通知徽章
-                loadRecentConversations();
-                // 重新加载用户列表，确保聊天过的用户显示在列表中
-                loadUsers();
-                // 更新通知徽章
-                if (typeof updateNotificationBadge === 'function') {
-                    updateNotificationBadge();
+                // 其他消息，更新会话列表、未读消息和通知徽章（使用全局统一防抖）
+                if (window.__chatRefreshLock.acquire()) {
+                    console.log('handleIncomingMessage触发数据刷新');
+                    
+                    // 更新对应发送者的最新消息预览
+                    if (message.senderId && message.content) {
+                        var senderUser = allUsers.find(function(u) { return u.id == message.senderId; });
+                        if (senderUser) {
+                            senderUser.lastMessage = message.content;
+                            senderUser.lastMessageTime = message.createdAt;
+                            var userItem = document.querySelector('.user-item[data-user-id="' + message.senderId + '"]');
+                            if (userItem) {
+                                var lastMsgEl = userItem.querySelector('.user-last-msg');
+                                var lastTimeEl = userItem.querySelector('.user-last-time');
+                                var previewText = message.content.length > 20 ? message.content.substring(0, 20) + '...' : message.content;
+                                if (lastMsgEl) lastMsgEl.textContent = previewText;
+                                if (lastTimeEl) lastTimeEl.textContent = formatChatTime(message.createdAt);
+                            }
+                        }
+                    }
+                    
+                    loadRecentConversations();
+                    loadUsers();
+                    if (typeof updateNotificationBadge === 'function') {
+                        updateNotificationBadge();
+                    }
+                    setTimeout(() => {
+                        window.__chatRefreshLock.release();
+                    }, 500);
+                } else {
+                    console.log('handleIncomingMessage刷新被统一防抖拦截');
                 }
             }
         }
@@ -1883,8 +2295,13 @@
         function markMessagesAsRead(senderId) {
             console.log('标记消息为已读:', senderId);
             
-            // 调用REST API标记已读
-            fetch(`/messages/read/${senderId}?userId=${currentUser.id}`, {
+            if (!currentUser || !currentUser.id) {
+                console.warn('当前用户信息不存在，跳过标记已读');
+                return;
+            }
+            
+            // 1. 标记消息为已读
+            fetch(`/api/messages/read/${senderId}?currentUserId=${currentUser.id}`, {
                 method: 'POST'
             })
             .then(response => response.json())
@@ -1893,6 +2310,27 @@
             })
             .catch(error => {
                 console.error('标记已读失败:', error);
+            });
+
+            // 2. 同时标记来自该用户的通知为已读（修复通知显示已读消息的问题）
+            console.log('标记来自用户', senderId, '的通知为已读');
+            fetch(`/api/notifications/read/by-sender?senderId=${senderId}&userId=${currentUser.id}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    console.log('通知标记已读成功');
+                    // 更新通知Badge
+                    if (typeof updateNotificationBadge === 'function') {
+                        updateNotificationBadge();
+                    }
+                } else {
+                    console.error('通知标记已读失败:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('标记通知已读失败:', error);
             });
             
             // 通过WebSocket发送已读通知
@@ -1942,7 +2380,25 @@
         });
         
         window.addEventListener('load', async function() {
-            await init();
+            console.log('=== window load事件触发 ===');
+            console.log('isInitialized:', isInitialized);
+            console.log('chatPageInitState:', window.chatPageInitState);
+            
+            if (isInitialized || (window.chatPageInitState && window.chatPageInitState.initialized)) {
+                console.log('已初始化，跳过');
+                return;
+            }
+            
+            if (window.chatPageInitState && window.chatPageInitState.initInProgress) {
+                console.log('初始化进行中，等待...');
+                return;
+            }
+            
+            try {
+                await init();
+            } catch (error) {
+                console.error('初始化错误:', error);
+            }
         });
         
         // 页面卸载时清理资源

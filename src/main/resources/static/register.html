@@ -602,7 +602,7 @@
     </div>
     
     <script>
-        const API_BASE_URL = '';
+        const API_BASE_URL = window.location.origin + '/api';
         let avatarData = null;
         
         // 主题切换功能
@@ -781,6 +781,7 @@
                 });
                 
                 var data = await response.json();
+                console.log('注册响应:', data);
                 
                 if (data.code === 200) {
                     showMessage('注册成功，请登录', 'success');
@@ -788,7 +789,8 @@
                         window.location.href = '/login.html';
                     }, 1500);
                 } else {
-                    showMessage('注册失败：' + data.message, 'error');
+                    var errorMsg = data.message || data.error || '未知错误，请稍后重试';
+                    showMessage('注册失败：' + errorMsg, 'error');
                 }
             } catch (error) {
                 console.error('注册失败：', error);

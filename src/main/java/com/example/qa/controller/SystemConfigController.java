@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/system-config")
+@RequestMapping("/api/system-config")
 public class SystemConfigController {
 
     @Autowired

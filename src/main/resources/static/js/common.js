@@ -1,4 +1,4 @@
-const API_BASE_URL = window.location.origin;
+const API_BASE_URL = window.location.origin + '/api';
 let currentUser = null;
 var logoutCallback = null;
 var loginConflictModalShown = false;
@@ -399,9 +399,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 延迟执行非关键操作，提高页面加载速度
     setTimeout(() => {
+        var isChatPage = window.location.pathname.indexOf('chat.html') !== -1;
+        
         updateNotificationBadge();
-        setInterval(updateNotificationBadge, 15000); // 延长间隔，减少网络请求
-        setInterval(checkLoginStatus, 30000); // 延长间隔，减少网络请求
+        
+        if (isChatPage) {
+            // 聊天页面：降低通知轮询频率，避免干扰WebSocket通信
+            setInterval(updateNotificationBadge, 60000);
+            setInterval(checkLoginStatus, 60000);
+        } else {
+            setInterval(updateNotificationBadge, 15000);
+            setInterval(checkLoginStatus, 30000);
+        }
     }, 50);
 });
 
@@ -462,27 +471,31 @@ async function updateNotificationBadge() {
                 var data = await response.json();
                 
                 if (data.code === 200) {
-                    var count = data.data.count;
+                    var count = data.data.count || 0;
+                    console.log('🔔 未读通知数:', count);
                     var badge = document.getElementById('notificationBadge');
                     if (badge) {
                         if (count > 0) {
                             badge.textContent = count > 99 ? '99+' : count;
                             badge.style.display = 'flex';
-                            // 确保徽章样式正确
-                            badge.style.position = 'absolute';
-                            badge.style.top = '-8px';
-                            badge.style.right = '-8px';
-                            badge.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
-                            badge.style.color = 'white';
-                            badge.style.border = '2px solid white';
-                            badge.style.borderRadius = '50%';
-                            badge.style.minWidth = '20px';
-                            badge.style.height = '20px';
-                            badge.style.justifyContent = 'center';
-                            badge.style.alignItems = 'center';
-                            badge.style.fontSize = '12px';
-                            badge.style.fontWeight = 'bold';
-                            badge.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.6)';
+                            // 确保徽章样式正确（强制设置，防止被CSS覆盖）
+                            Object.assign(badge.style, {
+                                position: 'absolute',
+                                top: '-8px',
+                                right: '-8px',
+                                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                color: 'white',
+                                border: '2px solid white',
+                                borderRadius: '50%',
+                                minWidth: '20px',
+                                height: '20px',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.6)',
+                                zIndex: '1000'
+                            });
                         } else {
                             badge.style.display = 'none';
                         }
@@ -617,20 +630,115 @@ async function loadNotifications() {
     }
 }
 
+/**
+ * 获取当前活跃的聊天对象ID（兼容所有页面）
+ * @returns {string|null} 当前活跃聊天对象的用户ID
+ */
+function getActiveChatUserId() {
+    // 只有在chat.html页面时才认为有活跃聊天
+    // 其他页面（home/questions/profile等）不应该过滤聊天消息
+    var isChatPage = window.location.pathname.includes('chat') ||
+                     document.getElementById('chatUserSelect');
+
+    if (!isChatPage) {
+        console.log('📱 非聊天页面，返回null（不过滤任何聊天消息）');
+        return null; // 非聊天页面，返回null表示不过滤
+    }
+
+    // 方法1: 从chat.html的下拉框获取
+    var chatUserSelect = document.getElementById('chatUserSelect');
+    if (chatUserSelect && chatUserSelect.value) {
+        console.log('📱 当前活跃聊天对象(从select获取):', chatUserSelect.value);
+        return chatUserSelect.value;
+    }
+
+    // 方法2: 从URL参数获取（适用于chat.html?userId=X）
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('userId')) {
+        console.log('📱 当前活跃聊天对象(从URL获取):', urlParams.get('userId'));
+        return urlParams.get('userId');
+    }
+
+    // 方法3: 从localStorage获取最后聊天的用户ID（仅在chat页面有效）
+    var lastChatUser = localStorage.getItem('lastChatUserId');
+    if (lastChatUser) {
+        console.log('📱 当前活跃聊天对象(从localStorage获取):', lastChatUser);
+        return lastChatUser;
+    }
+
+    return null;
+}
+
+/**
+ * 判断是否应该过滤某条聊天通知
+ * @param {Object} notification - 通知对象
+ * @param {string|null} activeChatUserId - 当前活跃聊天对象ID
+ * @returns {boolean} true表示应该过滤（不显示），false表示应该显示
+ */
+function shouldFilterChatNotification(notification, activeChatUserId) {
+    // 如果当前没有活跃聊天窗口，不过滤（显示所有聊天消息）
+    if (!activeChatUserId) return false;
+
+    // 如果通知的发送者不是当前聊天对象，不过滤
+    if (!notification.fromUserId || notification.fromUserId.toString() !== activeChatUserId.toString()) return false;
+
+    // 如果是当前聊天对象发的消息，检查时间戳
+    // 如果消息时间早于打开聊天窗口的时间，说明是历史消息，不应过滤
+    var chatOpenTime = localStorage.getItem('chatOpenTime_' + activeChatUserId);
+    if (chatOpenTime && notification.createdAt) {
+        try {
+            var msgTime = new Date(notification.createdAt).getTime();
+            var openTime = new Date(chatOpenTime).getTime();
+            if (msgTime < openTime) {
+                return false; // 打开聊天窗口之前的历史消息，不过滤
+            }
+        } catch (e) {
+            console.warn('解析消息时间失败:', e);
+        }
+    }
+
+    // 默认过滤当前聊天对象的实时消息
+    console.log('🔄 过滤实时聊天消息:', notification.id, 'from:', notification.fromUsername);
+    return true;
+}
+
 function renderNotifications(notifications) {
     var listContainer = document.getElementById('notificationList');
     if (!listContainer) return;
-    
+
     var html = '';
-    
+
     if (!notifications || notifications.length === 0) {
         html = '<div class="notification-empty">暂无通知</div>';
     } else {
+        // 获取当前活跃的聊天对象ID（兼容所有页面）
+        var currentActiveChatUserId = getActiveChatUserId();
+        console.log('📱 当前活跃聊天对象ID:', currentActiveChatUserId);
+
         notifications.forEach(function(notification) {
-            var typeIcon = notification.type === 'LIKE' ? '👍' : (notification.type === 'CHAT' ? '💬' : '💬');
+            var isChatMsg = (notification.type === 'CHAT' || notification.type === 'CHAT_MESSAGE' || notification.type === 'MESSAGE');
+
+            if (isChatMsg && notification.fromUserId) {
+                // 使用智能过滤函数判断是否应该过滤此消息
+                if (shouldFilterChatNotification(notification, currentActiveChatUserId)) {
+                    return; // 跳过这条消息
+                }
+            }
+
+            var typeIcon = '🔔';
+            if (notification.type === 'LIKE') {
+                typeIcon = '👍';
+            } else if (notification.type === 'CHAT' || notification.type === 'CHAT_MESSAGE' || notification.type === 'MESSAGE') {
+                typeIcon = '💬';
+            } else if (notification.type === 'COMMENT') {
+                typeIcon = '💬';
+            } else if (notification.type === 'ANSWER') {
+                typeIcon = '✅';
+            }
+
             var readClass = notification.isRead ? 'notification-read' : 'notification-unread';
             var timeAgo = getTimeAgo(notification.createdAt);
-            
+
             html += '<div class="notification-item ' + readClass + '" id="notification-' + notification.id + '" ' +
                 'data-notification-id="' + notification.id + '" ' +
                 'data-notification-type="' + notification.type + '" ' +
@@ -645,7 +753,7 @@ function renderNotifications(notifications) {
                 '</div>';
         });
     }
-    
+
     listContainer.innerHTML = html;
     
     // 确保通知面板不会阻止点击事件
@@ -658,13 +766,18 @@ function renderNotifications(notifications) {
     
     var items = listContainer.querySelectorAll('.notification-item');
     items.forEach(function(item) {
-        // 移除可能存在的旧事件监听器
         var newItem = item.cloneNode(true);
         item.parentNode.replaceChild(newItem, item);
+        
+        var isProcessing = false;
         
         newItem.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
+            
+            if (isProcessing) return;
+            isProcessing = true;
+            setTimeout(function() { isProcessing = false; }, 800);
             
             var notificationId = this.getAttribute('data-notification-id');
             var notificationType = this.getAttribute('data-notification-type');
@@ -680,7 +793,6 @@ function renderNotifications(notifications) {
                 questionId: questionId
             });
             
-            // 立即处理点击，避免事件冲突
             if (notificationType === 'CHAT') {
                 handleChatNotificationClick(fromUserId, fromUsername, notificationId);
             } else {
@@ -688,51 +800,62 @@ function renderNotifications(notifications) {
             }
         }, { passive: false });
         
-        // 为移动设备添加触摸事件支持
-        newItem.addEventListener('touchstart', function(e) {
-            this.classList.add('touch-active');
-        });
-        
         newItem.addEventListener('touchend', function(e) {
-            this.classList.remove('touch-active');
-            // 触发点击事件
-            var clickEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-                view: window
-            });
-            this.dispatchEvent(clickEvent);
-        });
+            e.preventDefault();
+            if (isProcessing) return;
+            isProcessing = true;
+            setTimeout(function() { isProcessing = false; }, 800);
+            
+            var notificationId = this.getAttribute('data-notification-id');
+            var notificationType = this.getAttribute('data-notification-type');
+            var fromUserId = this.getAttribute('data-from-user-id');
+            var fromUsername = this.getAttribute('data-from-username');
+            var questionId = this.getAttribute('data-question-id');
+            
+            if (notificationType === 'CHAT') {
+                handleChatNotificationClick(fromUserId, fromUsername, notificationId);
+            } else {
+                handleNotificationClick(notificationId, questionId, notificationType);
+            }
+        }, { passive: false });
     });
 }
 
 function handleChatNotificationClick(fromUserId, fromUsername, notificationId) {
     console.log('处理聊天通知点击:', fromUserId, fromUsername, notificationId);
-    markNotificationAsRead(notificationId);
+    
     var item = document.getElementById('notification-' + notificationId);
     if (item) {
-        item.style.display = 'none';
+        item.remove();
     }
-    updateNotificationBadge();
+    
+    markNotificationAsRead(notificationId).then(function() {
+        updateNotificationBadge();
+    });
+    
     window.location.href = '/chat.html?userId=' + fromUserId;
 }
 
 async function handleNotificationClick(notificationId, questionId, type) {
     console.log('处理通知点击:', notificationId, questionId, type);
     
-    // 先标记为已读
-    await markNotificationAsRead(notificationId);
-    
-    // 隐藏通知项
     var item = document.getElementById('notification-' + notificationId);
     if (item) {
-        item.style.display = 'none';
+        item.remove();
     }
     
-    // 更新通知徽章
-    updateNotificationBadge();
+    try {
+        await markNotificationAsRead(notificationId);
+    } catch(e) {
+        console.error('标记已读失败:', e);
+    }
     
-    // 跳转到问题详情页
+    try {
+        await updateNotificationBadge();
+    } catch(e) {
+        console.error('更新徽章失败:', e);
+    }
+    
     if (questionId) {
         window.location.href = '/question-detail.html?id=' + questionId;
     }
@@ -744,9 +867,13 @@ async function markNotificationAsRead(notificationId) {
     
     while (retries > 0) {
         try {
-            await fetch(API_BASE_URL + '/notifications/' + notificationId + '/read', {
-                method: 'POST'
-            });
+            var user = localStorage.getItem('user');
+            var userId = user ? JSON.parse(user).id : null;
+            var url = API_BASE_URL + '/notifications/' + notificationId + '/read';
+            if (userId) url += '?userId=' + userId;
+            
+            var response = await fetch(url, { method: 'PUT' });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
             return true;
         } catch (error) {
             console.error('标记通知已读失败:', error);
@@ -778,8 +905,8 @@ async function markAllNotificationsRead() {
         
         while (retries > 0 && !success) {
             try {
-                var response = await fetch(API_BASE_URL + '/notifications/read-all?userId=' + userId, {
-                    method: 'POST'
+                var response = await fetch(API_BASE_URL + '/notifications/read/all?userId=' + userId, {
+                    method: 'PUT'
                 });
                 
                 if (!response.ok) {
@@ -789,15 +916,17 @@ async function markAllNotificationsRead() {
                 var data = await response.json();
                 
                 if (data.code === 200) {
-                    // 重新加载通知，此时应该显示为空
-                    await loadNotifications();
-                    // 更新通知徽章
-                    await updateNotificationBadge();
-                    // 隐藏所有通知项
-                    var notificationItems = document.querySelectorAll('.notification-item');
-                    notificationItems.forEach(function(item) {
-                        item.style.display = 'none';
-                    });
+                    var listContainer = document.getElementById('notificationList');
+                    if (listContainer) {
+                        listContainer.innerHTML = '<div class="notification-empty">暂无通知</div>';
+                    }
+                    
+                    try {
+                        await updateNotificationBadge();
+                    } catch(e) {
+                        console.error('更新徽章失败:', e);
+                    }
+                    
                     success = true;
                 } else {
                     throw new Error('全部标记已读失败: ' + (data.message || '未知错误'));

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @RestController
-@RequestMapping("/notifications")
+@RequestMapping("/api/notifications")
 public class NotificationController {
 
     @Autowired
@@ -37,11 +37,15 @@ public class NotificationController {
     }
 
     @GetMapping("/unread")
-    public ApiResponse getUnreadNotifications(HttpSession session) {
+    public ApiResponse getUnreadNotifications(@RequestParam(required = false) Long userId, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
             if (user == null) {
-                return ApiResponse.error("用户未登录");
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
             }
             List<Notification> notifications = notificationService.getUnreadNotifications(user.getId());
             return ApiResponse.success("获取成功", notifications);
@@ -94,6 +98,25 @@ public class NotificationController {
                 return ApiResponse.error("用户未登录");
             }
             notificationService.markAsRead(id);
+            return ApiResponse.success("标记成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("标记失败: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/read/by-sender")
+    public ApiResponse markAsReadBySender(@RequestParam Long senderId, @RequestParam(required = false) Long userId, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                if (userId == null) {
+                    return ApiResponse.error("用户未登录");
+                }
+                user = new User();
+                user.setId(userId);
+            }
+            notificationService.markAsReadBySender(user.getId(), senderId);
             return ApiResponse.success("标记成功");
         } catch (Exception e) {
             e.printStackTrace();

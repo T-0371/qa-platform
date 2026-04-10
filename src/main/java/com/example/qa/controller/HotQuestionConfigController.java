@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/hot-question-config")
+@RequestMapping("/api/hot-question-config")
 public class HotQuestionConfigController {
 
     @Autowired

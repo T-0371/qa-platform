@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+// 数据库迁移配置类
 @Configuration
 public class DatabaseMigrationConfig {
 

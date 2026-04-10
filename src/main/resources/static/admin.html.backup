@@ -441,92 +441,23 @@
         .pagination {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 24px;
-            white-space: nowrap;
-            overflow-x: auto;
-            background: rgba(26, 26, 46, 0.8);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(236, 72, 153, 0.3);
-            border-radius: 12px;
-            padding: 16px 28px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .pagination-info {
-            color: #e2e8f0;
-            font-size: 14px;
-            margin: 0 12px;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .pagination button {
-            padding: 10px 16px;
-            border: 2px solid rgba(236, 72, 153, 0.3);
-            background: rgba(26, 26, 46, 0.9);
-            color: #e2e8f0;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-width: 50px;
-            font-weight: 600;
-            font-size: 14px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .pagination button:hover:not(:disabled) {
-            background: rgba(236, 72, 153, 0.3);
-            color: #ffffff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
-        }
-
-        .pagination button.active {
-            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
-            font-weight: 700;
-        }
-
-        .pagination button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            background: rgba(26, 26, 46, 0.6);
-            color: #94a3b8;
-        }
-
-        .page-size-selector {
-            display: flex;
-            align-items: center;
             gap: 8px;
-            margin-left: 24px;
-            color: #94a3b8;
-            font-weight: 500;
-            font-size: 14px;
-            white-space: nowrap;
-            flex-shrink: 0;
+            margin-top: 24px;
         }
-
-        .page-size-selector select {
-            padding: 8px 14px;
-            border: 1px solid rgba(236, 72, 153, 0.2);
-            background: rgba(26, 26, 46, 0.6);
-            color: #ffffff;
+        
+        .page-btn {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
+            color: var(--text-primary);
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 14px;
+            transition: all 0.2s;
         }
-
-        .page-size-selector select:hover {
-            border-color: #ec4899;
+        
+        .page-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
         }
         
         .page-btn.active {
@@ -803,33 +734,12 @@
             }
             
             .pagination {
-                gap: 6px;
-                padding: 12px 16px;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+                flex-direction: column;
+                gap: 8px;
             }
-
-            .pagination-info {
-                font-size: 12px;
-                margin: 0 8px;
-            }
-
+            
             .pagination button {
-                width: auto;
-                padding: 8px 12px;
-                font-size: 12px;
-                min-width: 40px;
-            }
-
-            .page-size-selector {
-                margin-left: 12px;
-                font-size: 12px;
-                gap: 4px;
-            }
-
-            .page-size-selector select {
-                padding: 6px 10px;
-                font-size: 12px;
+                width: 100%;
             }
             
             .form-input, .form-select, .form-textarea {
@@ -1109,21 +1019,7 @@
                                 <tbody id="usersTableBody"></tbody>
                             </table>
                         </div>
-                        <div class="pagination" id="usersPagination">
-                            <div class="pagination-info">
-                                共 <span id="usersTotalCount">0</span> 条，
-                                第 <span id="usersCurrentPage">1</span> / <span id="usersTotalPages">1</span> 页
-                            </div>
-                            <div class="page-size-selector">
-                                <label for="usersPageSize">每页显示：</label>
-                                <select id="usersPageSize" onchange="changeUsersPageSize(this.value)">
-                                    <option value="5">5条</option>
-                                    <option value="10" selected>10条</option>
-                                    <option value="20">20条</option>
-                                    <option value="50">50条</option>
-                                </select>
-                            </div>
-                        </div>
+                        <div class="pagination" id="usersPagination"></div>
                     </div>
                 </div>
             </div>
@@ -1162,21 +1058,7 @@
                                 <tbody id="questionsTableBody"></tbody>
                             </table>
                         </div>
-                        <div class="pagination" id="questionsPagination">
-                            <div class="pagination-info">
-                                共 <span id="questionsTotalCount">0</span> 条，
-                                第 <span id="questionsCurrentPage">1</span> / <span id="questionsTotalPages">1</span> 页
-                            </div>
-                            <div class="page-size-selector">
-                                <label for="questionsPageSize">每页显示：</label>
-                                <select id="questionsPageSize" onchange="changeQuestionsPageSize(this.value)">
-                                    <option value="5">5条</option>
-                                    <option value="10" selected>10条</option>
-                                    <option value="20">20条</option>
-                                    <option value="50">50条</option>
-                                </select>
-                            </div>
-                        </div>
+                        <div class="pagination" id="questionsPagination"></div>
                     </div>
                 </div>
             </div>
@@ -1650,75 +1532,21 @@
                 second: '2-digit'
             });
         }
-
+        
         function renderPagination(containerId, total, currentPage, callback) {
-            const paginationDiv = document.getElementById(containerId);
-            if (!paginationDiv) return;
-
-            const totalCountEl = paginationDiv.querySelector('[id$="TotalCount"]');
-            const currentPageNumEl = paginationDiv.querySelector('[id$="CurrentPage"]');
-            const totalPageNumEl = paginationDiv.querySelector('[id$="TotalPages"]');
-
-            if (totalCountEl) totalCountEl.textContent = total;
-            if (currentPageNumEl) currentPageNumEl.textContent = currentPage;
-            if (totalPageNumEl) totalPageNumEl.textContent = Math.ceil(total / pageSize) || 1;
-
-            const existingButtons = paginationDiv.querySelectorAll('button');
-            existingButtons.forEach(button => button.remove());
-
-            const totalPages = Math.ceil(total / pageSize) || 1;
-            if (totalPages <= 1) {
-                paginationDiv.style.display = 'flex';
-                return;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            const pageCount = Math.ceil(total / 10);
+            
+            for (let i = 1; i <= pageCount; i++) {
+                const button = document.createElement('button');
+                button.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                button.textContent = i;
+                button.onclick = () => callback(i);
+                container.appendChild(button);
             }
-
-            const prevButton = document.createElement('button');
-            prevButton.textContent = '上一页';
-            prevButton.disabled = currentPage === 1;
-            prevButton.onclick = function() {
-                if (currentPage > 1) {
-                    callback(currentPage - 1);
-                }
-            };
-            paginationDiv.appendChild(prevButton);
-
-            for (let i = 1; i <= totalPages; i++) {
-                const pageButton = document.createElement('button');
-                pageButton.textContent = i;
-                pageButton.className = i === currentPage ? 'active' : '';
-                pageButton.onclick = (function(page) {
-                    return function() {
-                        callback(page);
-                    };
-                })(i);
-                paginationDiv.appendChild(pageButton);
-            }
-
-            const nextButton = document.createElement('button');
-            nextButton.textContent = '下一页';
-            nextButton.disabled = currentPage === totalPages;
-            nextButton.onclick = function() {
-                if (currentPage < totalPages) {
-                    callback(currentPage + 1);
-                }
-            };
-            paginationDiv.appendChild(nextButton);
-        }
-
-        function changeUsersPageSize(newSize) {
-            console.log('🔄 切换用户管理每页条数:', newSize);
-            pageSize = parseInt(newSize);
-            usersPage = 1;
-            console.log('✅ 新pageSize:', pageSize, 'usersPage:', usersPage);
-            displayUsers();
-        }
-
-        function changeQuestionsPageSize(newSize) {
-            console.log('🔄 切换问题管理每页条数:', newSize);
-            pageSize = parseInt(newSize);
-            questionsPage = 1;
-            console.log('✅ 新pageSize:', pageSize, 'questionsPage:', questionsPage);
-            displayQuestions();
         }
         
         function logout() {
@@ -1728,26 +1556,13 @@
 
         let usersPage = 1;
         let questionsPage = 1;
-        let pageSize = 10;
-
-        let allUsers = [];
-        let allQuestionsData = [];
-        let filteredUsers = [];
-        let filteredQuestions = [];
+        const pageSize = 10;
         
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('active');
         }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
+        
         document.addEventListener('DOMContentLoaded', function() {
             if (checkAdminAuth()) {
                 setupNavigation();
@@ -1757,19 +1572,8 @@
                 loadTags();
                 loadHotConfig();
                 initColorPickers();
-                initSearchDebounce();
             }
         });
-
-        function initSearchDebounce() {
-            const searchInput = document.getElementById('questionSearchInput');
-            if (searchInput) {
-                const debouncedSearch = debounce(function() {
-                    searchQuestions();
-                }, 500);
-                searchInput.addEventListener('input', debouncedSearch);
-            }
-        }
         
         function initColorPickers() {
             const primaryColorPicker = document.getElementById('primaryColorPicker');
@@ -1960,31 +1764,22 @@
             }
         }
         
-        async function loadUsers(keyword = '') {
+        async function loadUsers(page = 1, keyword = '') {
             try {
-                console.log('📥 loadUsers 全量加载 - keyword:', keyword);
-                let url = API_BASE_URL + '/users?page=1&size=1000';
+                let url = API_BASE_URL + '/users?page=' + page + '&size=' + pageSize;
                 if (keyword) {
                     url += '&keyword=' + encodeURIComponent(keyword);
                 }
-
+                
                 const res = await fetch(url);
                 const data = await res.json();
-
+                
                 if (data.code === 200) {
                     const result = data.data;
-                    console.log('📋 loadUsers API响应:', result);
-                    allUsers = Array.isArray(result) ? result : (result.records || []);
-                    filteredUsers = keyword
-                        ? allUsers.filter(user =>
-                            user.username?.toLowerCase().includes(keyword.toLowerCase()) ||
-                            user.email?.toLowerCase().includes(keyword.toLowerCase())
-                          )
-                        : [...allUsers];
-
-                    console.log('✅ 全部用户数:', allUsers.length, '筛选后用户数:', filteredUsers.length);
-                    usersPage = 1;
-                    displayUsers();
+                    const users = Array.isArray(result) ? result : (result.records || []);
+                    const total = Array.isArray(result) ? result.length : (result.total || 0);
+                    renderUsersTable(users);
+                    renderPagination('usersPagination', total, page, (p) => loadUsers(p, keyword));
                 } else {
                     showMessage('加载用户列表失败: ' + data.message, 'error');
                 }
@@ -1992,19 +1787,6 @@
                 console.error('加载用户列表失败:', error);
                 showMessage('加载用户列表失败，请检查后端服务是否启动', 'error');
             }
-        }
-
-        function displayUsers() {
-            const startIndex = (usersPage - 1) * pageSize;
-            const endIndex = startIndex + pageSize;
-            const pageUsers = filteredUsers.slice(startIndex, endIndex);
-
-            console.log('🎨 displayUsers - 页码:', usersPage, '每页:', pageSize, '显示:', pageUsers.length, '条');
-            renderUsersTable(pageUsers);
-            renderPagination('usersPagination', filteredUsers.length, usersPage, (p) => {
-                usersPage = p;
-                displayUsers();
-            });
         }
         
         function renderUsersTable(users) {
@@ -2014,10 +1796,12 @@
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-secondary);">暂无用户数据</td></tr>';
                 return;
             }
-
+            
+            const startIndex = (usersPage - 1) * pageSize;
+            
             tbody.innerHTML = users.map((user, index) => `
                 <tr>
-                    <td>${index + 1}</td>
+                    <td>${startIndex + index + 1}</td>
                     <td>${escapeHtml(user.username)}</td>
                     <td>${escapeHtml(user.email)}</td>
                     <td><span class="tag ${user.role === 'ADMIN' ? 'tag-danger' : 'tag-info'}">${user.role === 'ADMIN' ? '管理员' : '普通用户'}</span></td>
@@ -2038,7 +1822,7 @@
         function searchUsers() {
             const keyword = document.getElementById('userSearchInput').value.trim();
             usersPage = 1;
-            loadUsers(keyword);
+            loadUsers(1, keyword);
         }
         
         function showAddUserModal() {
@@ -2136,31 +1920,22 @@
             }
         }
         
-        async function loadQuestions(keyword = '') {
+        async function loadQuestions(page = 1, keyword = '') {
             try {
-                console.log('📥 loadQuestions 全量加载 - keyword:', keyword);
-                let url = API_BASE_URL + '/questions?page=1&size=1000';
+                let url = API_BASE_URL + '/questions?page=' + page + '&size=' + pageSize;
                 if (keyword) {
-                    url = API_BASE_URL + '/questions/search?keyword=' + encodeURIComponent(keyword) + '&page=1&size=1000';
+                    url = API_BASE_URL + '/questions/search?keyword=' + encodeURIComponent(keyword) + '&page=' + page + '&size=' + pageSize;
                 }
-
+                
                 const res = await fetch(url);
                 const data = await res.json();
-
+                
                 if (data.code === 200) {
                     const result = data.data;
-                    console.log('📋 loadQuestions API响应:', result);
-                    allQuestionsData = Array.isArray(result) ? result : (result.records || []);
-                    filteredQuestions = keyword
-                        ? allQuestionsData.filter(q =>
-                            q.title?.toLowerCase().includes(keyword.toLowerCase()) ||
-                            q.content?.toLowerCase().includes(keyword.toLowerCase())
-                          )
-                        : [...allQuestionsData];
-
-                    console.log('✅ 全部问题数:', allQuestionsData.length, '筛选后问题数:', filteredQuestions.length);
-                    questionsPage = 1;
-                    displayQuestions();
+                    const questions = Array.isArray(result) ? result : (result.records || []);
+                    const total = Array.isArray(result) ? result.length : (result.total || 0);
+                    renderQuestionsTable(questions);
+                    renderPagination('questionsPagination', total, page, (p) => loadQuestions(p, keyword));
                 } else {
                     showMessage('加载问题列表失败: ' + data.message, 'error');
                 }
@@ -2168,19 +1943,6 @@
                 console.error('加载问题列表失败:', error);
                 showMessage('加载问题列表失败，请检查后端服务是否启动', 'error');
             }
-        }
-
-        function displayQuestions() {
-            const startIndex = (questionsPage - 1) * pageSize;
-            const endIndex = startIndex + pageSize;
-            const pageQuestions = filteredQuestions.slice(startIndex, endIndex);
-
-            console.log('🎨 displayQuestions - 页码:', questionsPage, '每页:', pageSize, '显示:', pageQuestions.length, '条');
-            renderQuestionsTable(pageQuestions);
-            renderPagination('questionsPagination', filteredQuestions.length, questionsPage, (p) => {
-                questionsPage = p;
-                displayQuestions();
-            });
         }
         
         function renderQuestionsTable(questions) {
@@ -2190,10 +1952,12 @@
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">暂无问题数据</td></tr>';
                 return;
             }
-
+            
+            const startIndex = (questionsPage - 1) * pageSize;
+            
             tbody.innerHTML = questions.map((q, index) => `
                 <tr>
-                    <td>${index + 1}</td>
+                    <td>${startIndex + index + 1}</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(q.title)}</td>
                     <td>${escapeHtml(q.userName || '用户' + q.userId)}</td>
                     <td>${q.viewCount || 0}</td>
@@ -2218,7 +1982,7 @@
         function searchQuestions() {
             const keyword = document.getElementById('questionSearchInput').value.trim();
             questionsPage = 1;
-            loadQuestions(keyword);
+            loadQuestions(1, keyword);
         }
         
         function viewQuestion(id) {
@@ -2283,7 +2047,7 @@
                 if (data.code === 200) {
                     showMessage('问题更新成功', 'success');
                     closeQuestionModal();
-                    loadQuestions();
+                    loadQuestions(questionsPage);
                 } else {
                     showMessage('更新失败: ' + data.message, 'error');
                 }
@@ -2310,7 +2074,7 @@
                     const data = await res.json();
                     if (data.code === 200) {
                         showMessage('问题已删除', 'success');
-                        loadQuestions();
+                        loadQuestions(questionsPage);
                     } else {
                         showMessage('删除失败: ' + data.message, 'error');
                     }
@@ -2341,7 +2105,7 @@
                 const data = await res.json();
                 if (data.code === 200) {
                     showMessage('问题状态已切换为' + (newStatus === 'OPEN' ? '开放' : '已关闭'), 'success');
-                    loadQuestions();
+                    loadQuestions(questionsPage);
                 } else {
                     showMessage('切换状态失败: ' + data.message, 'error');
                 }
@@ -2784,6 +2548,31 @@
                 uploadStatus.textContent = '上传失败，请重试';
                 uploadStatus.style.color = '#f44336';
             }
+        }
+        
+        function renderPagination(containerId, total, currentPage, callback) {
+            const container = document.getElementById(containerId);
+            const totalPages = Math.ceil(total / pageSize);
+            
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            html += '<button class="page-btn" ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="(' + callback.name + ')(' + (currentPage - 1) + ')">上一页</button>';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    html += '<button class="page-btn ' + (i === currentPage ? 'active' : '') + '" onclick="(' + callback.name + ')(' + i + ')">' + i + '</button>';
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += '<span style="padding: 8px; color: var(--text-secondary);">...</span>';
+                }
+            }
+            
+            html += '<button class="page-btn" ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="(' + callback.name + ')(' + (currentPage + 1) + ')">下一页</button>';
+            
+            container.innerHTML = html;
         }
         
         function showMessage(message, type) {

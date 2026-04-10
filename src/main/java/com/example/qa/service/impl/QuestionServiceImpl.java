@@ -122,6 +122,28 @@ public class QuestionServiceImpl implements QuestionService {
         }
         return questions;
     }
+
+    @Override
+    public java.util.Map<String, Object> getQuestionListWithTotal(int page, int size) {
+        IPage<Question> questionPage = new Page<>(page, size);
+        LambdaQueryWrapper<Question> wrapper = new LambdaQueryWrapper<>();
+        wrapper.orderByDesc(Question::getCreatedAt);
+        questionMapper.selectPage(questionPage, wrapper);
+
+        List<Question> questions = questionPage.getRecords();
+        for (Question question : questions) {
+            loadQuestionTags(question);
+            loadQuestionUserName(question);
+        }
+
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        result.put("records", questions);
+        result.put("total", questionPage.getTotal());
+        result.put("pages", questionPage.getPages());
+        result.put("current", questionPage.getCurrent());
+        result.put("size", questionPage.getSize());
+        return result;
+    }
     
     private void loadQuestionUserName(Question question) {
         User user = userMapper.selectById(question.getUserId());

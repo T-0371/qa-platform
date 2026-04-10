@@ -1,6 +1,7 @@
 package com.example.qa.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.example.qa.entity.Notification;
 import com.example.qa.mapper.NotificationMapper;
 import com.example.qa.service.NotificationService;
@@ -106,6 +107,16 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void markAsRead(Long id) {
         notificationMapper.markAsRead(id);
+    }
+
+    @Override
+    public void markAsReadBySender(Long userId, Long senderId) {
+        LambdaUpdateWrapper<Notification> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Notification::getUserId, userId)
+                .eq(Notification::getFromUserId, senderId)
+                .eq(Notification::getIsRead, false)
+                .set(Notification::getIsRead, true);
+        notificationMapper.update(null, updateWrapper);
     }
     
     @Override

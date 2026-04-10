@@ -11,6 +11,7 @@ public interface NotificationService {
     int getUnreadCount(Long userId);
     void markAllAsRead(Long userId);
     void markAsRead(Long id);
+    void markAsReadBySender(Long userId, Long senderId);
     void deleteNotification(Long id);
     void deleteAllNotifications(Long userId);
 }

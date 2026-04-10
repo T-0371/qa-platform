@@ -25,6 +25,8 @@ public interface QuestionService {
      * @return 问题列表
      */
     List<Question> getQuestionList(int page, int size);
+
+    java.util.Map<String, Object> getQuestionListWithTotal(int page, int size);
     
     /**
      * 根据ID获取问题详情
