@@ -1,6 +1,0 @@
-查看具体端口情况：
-netstat -ano | findstr :8080
-终止端口进程：
-taskkill /PID 55632 /F
-启动项目命令：
-mvn spring-boot:run
